@@ -12,7 +12,7 @@ const executeRoutes = require('./routes/executeRoutes');
 
 const app = express();
 
-// Comprehensive Allowed Origins for Local and Deployed Environments
+// Comprehensive Allowed Origins for Local, LAN, and Deployed Environments
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
@@ -30,9 +30,10 @@ const corsOptions = {
     const isExplicitlyAllowed = allowedOrigins.includes(origin);
     const isVercelDomain = origin.endsWith('.vercel.app');
     const isRenderDomain = origin.endsWith('.onrender.com');
-    const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+    const isNetlifyDomain = origin.endsWith('.netlify.app');
+    const isLocalOrLAN = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/.test(origin);
 
-    if (isExplicitlyAllowed || isVercelDomain || isRenderDomain || isLocalhost) {
+    if (isExplicitlyAllowed || isVercelDomain || isRenderDomain || isNetlifyDomain || isLocalOrLAN) {
       return callback(null, true);
     }
     // Permissive fallback so legitimate client apps don't get blocked

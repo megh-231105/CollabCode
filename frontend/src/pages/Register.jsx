@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { authService } from '../services/api';
 import {
@@ -24,6 +24,7 @@ const Register = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useApp();
 
   const validateEmail = (email) => {
@@ -66,7 +67,7 @@ const Register = () => {
 
       setLoading(false);
       showToast(res.message || 'Registration successful! Please login.');
-      navigate('/login');
+      navigate('/login', { state: { from: location.state?.from } });
     } catch (err) {
       setLoading(false);
       setError(
@@ -260,7 +261,11 @@ const Register = () => {
           {/* Bottom Link */}
           <div className="text-center text-sm text-slate-400">
             Already have an account?{' '}
-            <Link to="/login" className="font-bold text-emerald-400 hover:text-emerald-300 transition">
+            <Link
+              to="/login"
+              state={{ from: location.state?.from }}
+              className="font-bold text-emerald-400 hover:text-emerald-300 transition"
+            >
               Login
             </Link>
           </div>

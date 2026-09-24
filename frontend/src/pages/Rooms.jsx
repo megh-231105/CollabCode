@@ -12,7 +12,10 @@ import {
   Clock,
   ExternalLink,
   Code2,
-  Trash2
+  Trash2,
+  Copy,
+  Check,
+  Share2
 } from 'lucide-react';
 
 const Rooms = () => {
@@ -20,8 +23,17 @@ const Rooms = () => {
     rooms,
     deleteRoom,
     setIsCreateModalOpen,
-    setIsJoinModalOpen
+    setIsJoinModalOpen,
+    showToast,
   } = useApp();
+  const [copiedId, setCopiedId] = useState(null);
+
+  const handleCopyId = (id) => {
+    navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    showToast(`Room ID ${id} copied! Share with friends to join.`);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('ALL');
@@ -123,9 +135,18 @@ const Rooms = () => {
                     <span className="px-2.5 py-1 rounded-md text-[11px] font-bold font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                       {room.language}
                     </span>
-                    <span className="text-xs font-mono font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-cyan-300">
-                      ID: {room.id}
-                    </span>
+                    <button
+                      onClick={() => handleCopyId(room.id)}
+                      title="Copy Room ID to invite friends"
+                      className="text-xs font-mono font-bold bg-slate-950 hover:bg-slate-800 px-2 py-0.5 rounded border border-slate-800 hover:border-cyan-500/40 text-cyan-300 flex items-center space-x-1 transition cursor-pointer"
+                    >
+                      <span>ID: {room.id}</span>
+                      {copiedId === room.id ? (
+                        <Check className="w-3 h-3 text-emerald-400" />
+                      ) : (
+                        <Copy className="w-3 h-3 text-slate-500 hover:text-white" />
+                      )}
+                    </button>
                   </div>
 
                   {/* Room Name & Description */}

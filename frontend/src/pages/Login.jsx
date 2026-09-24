@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { authService } from '../services/api';
@@ -21,6 +21,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const { showToast, refreshData } = useApp();
 
@@ -45,11 +46,13 @@ const Login = () => {
         await refreshData();
         showToast(`Welcome back, ${res.user.name}!`);
 
-        if (res.user.role === 'ADMIN') {
-          navigate('/admin');
-        } else {
-          navigate('/dashboard');
-        }
+        const fromPath = location.state?.from?.pathname
+          ? `${location.state.from.pathname}${location.state.from.search || ''}`
+          : res.user.role === 'ADMIN'
+          ? '/admin'
+          : '/dashboard';
+
+        navigate(fromPath, { replace: true });
       }
     } catch (err) {
       setLoading(false);
@@ -221,7 +224,11 @@ const Login = () => {
           {/* Bottom Link */}
           <div className="text-center text-sm text-slate-400">
             Don't have an account?{' '}
-            <Link to="/register" className="font-bold text-emerald-400 hover:text-emerald-300 transition">
+            <Link
+              to="/register"
+              state={{ from: location.state?.from }}
+              className="font-bold text-emerald-400 hover:text-emerald-300 transition"
+            >
               Create Account
             </Link>
           </div>

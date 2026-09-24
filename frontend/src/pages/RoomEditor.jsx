@@ -19,6 +19,12 @@ import {
   Keyboard,
   LogOut,
   RotateCcw,
+  Globe,
+  X,
+  KeyRound,
+  ExternalLink,
+  Sparkles,
+  HelpCircle,
 } from 'lucide-react';
 
 const RoomEditor = () => {
@@ -47,6 +53,7 @@ const RoomEditor = () => {
   const [showStdin, setShowStdin] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [output, setOutput] = useState('');
   const [executionResult, setExecutionResult] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -307,12 +314,15 @@ const RoomEditor = () => {
 
           {/* Invite Friend Button */}
           <button
-            onClick={handleCopyInviteLink}
+            onClick={() => {
+              handleCopyInviteLink();
+              setIsInviteModalOpen(true);
+            }}
             className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold rounded-xl text-xs transition cursor-pointer"
             title="Invite friend to collaborate on this room"
           >
-            {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
-            <span>{copiedLink ? 'Link Copied!' : 'Invite Friend'}</span>
+            <Share2 className="w-3.5 h-3.5" />
+            <span>Invite Friend</span>
           </button>
 
           {/* Leave Room Button */}
@@ -474,7 +484,10 @@ const RoomEditor = () => {
                         ⚠️ Code encountered an error. Check syntax, variable names, or missing inputs.
                       </span>
                       <button
-                        onClick={handleCopyInviteLink}
+                        onClick={() => {
+                          handleCopyInviteLink();
+                          setIsInviteModalOpen(true);
+                        }}
                         className="text-cyan-400 hover:text-cyan-300 underline cursor-pointer"
                       >
                         Invite friend to help debug
@@ -573,23 +586,34 @@ const RoomEditor = () => {
             </div>
 
             {/* Invite Friend Card */}
-            <div className="p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-500/20 space-y-2">
+            <div className="p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-500/20 space-y-2.5">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
-                  <Share2 className="w-3.5 h-3.5" /> Call a Friend
+                  <Share2 className="w-3.5 h-3.5" /> Invite Collaborators
                 </span>
-                <span className="text-[10px] text-indigo-400">Real-time</span>
+                <span className="text-[10px] bg-indigo-500/20 text-indigo-300 font-semibold px-2 py-0.5 rounded-full">
+                  Real-time
+                </span>
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                Send this room link or Room ID to a friend to collaborate and debug errors together.
+                Invite peers to join this coding workspace using Room ID or direct invite link.
               </p>
-              <button
-                onClick={handleCopyInviteLink}
-                className="w-full py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/40 text-indigo-200 text-xs font-semibold rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                {copiedLink ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                <span>{copiedLink ? 'Invite Link Copied!' : 'Copy Invite Link'}</span>
-              </button>
+              <div className="space-y-2 pt-1">
+                <button
+                  onClick={() => setIsInviteModalOpen(true)}
+                  className="w-full py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20 cursor-pointer"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>Invite Friends (Get Link)</span>
+                </button>
+                <button
+                  onClick={handleCopyRoomId}
+                  className="w-full py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-[11px] font-semibold rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer font-mono"
+                >
+                  {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                  <span>{copied ? 'Room ID Copied!' : `Copy Room ID (${currentRoom.id || roomId})`}</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -600,6 +624,140 @@ const RoomEditor = () => {
           </div>
         </div>
       </div>
+
+      {/* Invite Collaborators Modal */}
+      {isInviteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
+          <div className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden text-slate-100">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-900/60">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                  <Share2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white tracking-tight">Invite Collaborator</h3>
+                  <p className="text-xs text-slate-400">Share room access to code together in real-time</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsInviteModalOpen(false)}
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
+              {/* Option 1: Room ID */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                  <KeyRound className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Option 1: Share Room ID (Easiest for all environments)</span>
+                </label>
+                <div className="flex items-center space-x-2">
+                  <div className="flex-1 bg-slate-950 border border-slate-700 px-4 py-3 rounded-xl flex items-center justify-between font-mono">
+                    <span className="text-lg font-black tracking-widest text-cyan-300">
+                      {currentRoom.id || roomId}
+                    </span>
+                    <span className="text-[11px] text-slate-500 uppercase font-sans font-semibold">6-Char Room Key</span>
+                  </div>
+                  <button
+                    onClick={handleCopyRoomId}
+                    className="px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 transition cursor-pointer shrink-0"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-4 h-4 text-emerald-400" />
+                        <span>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        <span>Copy ID</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Your friend can log into their CollabCode dashboard and click <strong className="text-slate-200">"Join Room"</strong>, then enter this ID.
+                </p>
+              </div>
+
+              {/* Option 2: Direct Share Link */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Option 2: Direct Invite URL</span>
+                </label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={`${window.location.origin}/rooms/${currentRoom.id || roomId}`}
+                    className="flex-1 bg-slate-950 border border-slate-700 px-3.5 py-2.5 rounded-xl text-xs text-slate-300 font-mono select-all focus:outline-none"
+                  />
+                  <button
+                    onClick={handleCopyInviteLink}
+                    className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs flex items-center space-x-1.5 transition cursor-pointer shrink-0 shadow-md shadow-emerald-500/20"
+                  >
+                    {copiedLink ? (
+                      <>
+                        <Check className="w-4 h-4 text-slate-950 stroke-[3]" />
+                        <span>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        <span>Copy Link</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Smart Environment Note */}
+              {window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? (
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200/90 text-xs space-y-2">
+                  <div className="flex items-center space-x-2 font-bold text-amber-300">
+                    <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span>Testing on Localhost?</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-amber-100/80">
+                    Because <code className="bg-amber-950/60 px-1 py-0.5 rounded text-amber-300">localhost</code> points to your own computer, sharing a <code className="bg-amber-950/60 px-1 py-0.5 rounded text-amber-300">localhost</code> URL with a friend on another computer will show <em>"localhost refused to connect"</em>.
+                  </p>
+                  <div className="pt-1 text-[11px] text-slate-300 space-y-1">
+                    <p className="font-semibold text-white">How your friend can join right now:</p>
+                    <ul className="list-disc pl-4 space-y-1 text-slate-300">
+                      <li><strong>Share Room ID:</strong> Give them the 6-character Room ID above to enter in their app.</li>
+                      <li><strong>Wi-Fi LAN:</strong> If on the same Wi-Fi, share your local IP (e.g. <code className="text-cyan-300">http://192.168.x.x:3000/rooms/{currentRoom.id || roomId}</code>).</li>
+                      <li><strong>Production Cloud:</strong> When deployed on Vercel/Netlify, the direct link works anywhere in the world automatically!</li>
+                    </ul>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center space-x-2.5">
+                  <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>
+                    <strong>Cloud Live:</strong> Anyone in the world can click this link to join your coding session!
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end p-4 border-t border-slate-800 bg-slate-900/40">
+              <button
+                onClick={() => setIsInviteModalOpen(false)}
+                className="px-5 py-2 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl transition cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -13,12 +13,21 @@ const getApiBaseUrl = () => {
     return clean;
   }
 
-  // If in browser on deployed Vercel domain or any remote host
+  // If running in browser: detect localhost, LAN IP, or deployed cloud domain
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
-    if (hostname !== 'localhost' && hostname !== '127.0.0.1' && hostname !== '0.0.0.0') {
-      return 'https://collabcode-0k7i.onrender.com/api';
+    const isLocalOrLAN =
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '0.0.0.0' ||
+      /^(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(hostname);
+
+    if (isLocalOrLAN) {
+      return `http://${hostname}:5000/api`;
     }
+
+    // Remote / Deployed production cloud backend
+    return 'https://collabcode-0k7i.onrender.com/api';
   }
 
   // Local development fallback

@@ -11,34 +11,71 @@ const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
-// Allowed Origins for CORS
+// Comprehensive Allowed Origins for Local and Deployed Environments
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
+  'http://localhost:4173',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:5173',
   'https://collab-code-jade.vercel.app',
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps, curl, server-to-server)
-      if (!origin) return callback(null, true);
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
 
-      if (
-        allowedOrigins.includes(origin) ||
-        origin.endsWith('.vercel.app')
-      ) {
-        return callback(null, true);
-      }
-      return callback(null, true); // Permissive fallback for seamless local/deployed demo access
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-);
+    const isExplicitlyAllowed = allowedOrigins.includes(origin);
+    const isVercelDomain = origin.endsWith('.vercel.app');
+    const isRenderDomain = origin.endsWith('.onrender.com');
+
+    if (isExplicitlyAllowed || isVercelDomain || isRenderDomain) {
+      return callback(null, true);
+    }
+    // Permissive fallback so legitimate client apps don't get blocked
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+  ],
+  exposedHeaders: ['Authorization'],
+};
+
+// 1. Primary CORS middleware
+app.use(cors(corsOptions));
+
+// 2. Preflight handling for all routes
+app.options('*', cors(corsOptions));
+
+// 3. Fallback Header Injector & OPTIONS handler
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+  );
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, X-Requested-With, Accept, Origin'
+  );
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
 
 app.use(express.json());
 
@@ -54,7 +91,8 @@ app.use('/api/admin', adminRoutes);
 app.get('/', (req, res) => {
   res.status(200).json({
     message: 'Welcome to CollabCode Collaborative Code Editor API',
-    version: '1.0.0',
+    status: 'ONLINE',
+    environment: process.env.NODE_ENV || 'production',
     documentation: {
       health: 'GET /api/health',
       register: 'POST /api/auth/register',

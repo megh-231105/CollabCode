@@ -1,7 +1,34 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+/**
+ * Automatically determine the backend API base URL
+ * Handles localhost, custom VITE_API_URL, and production Vercel -> Render routing
+ */
+const getApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+
+  if (envUrl && envUrl.trim()) {
+    let clean = envUrl.trim().replace(/\/+$/, '');
+    if (!clean.endsWith('/api') && !clean.includes('/api/')) {
+      clean += '/api';
+    }
+    return clean;
+  }
+
+  // If in browser on deployed Vercel domain or any remote host
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1' && hostname !== '0.0.0.0') {
+      return 'https://collabcode-0k7i.onrender.com/api';
+    }
+  }
+
+  // Local development fallback
+  return 'http://localhost:5000/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 /**
- * Generic request helper that handles JSON headers and Bearer token injection
+ * Generic request helper that handles JSON headers, Bearer token injection, and error formatting
  */
 const request = async (endpoint, options = {}) => {
   const token = localStorage.getItem('collabcode_token');
@@ -13,7 +40,10 @@ const request = async (endpoint, options = {}) => {
   };
 
   try {
-    const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+    const url = endpoint.startsWith('http')
+      ? endpoint
+      : `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+
     const response = await fetch(url, {
       ...options,
       headers,
@@ -31,9 +61,8 @@ const request = async (endpoint, options = {}) => {
     return data;
   } catch (err) {
     if (!err.status && err.name === 'TypeError') {
-      // Network / connection refused error
       const networkError = new Error(
-        'Unable to connect to backend server. Please make sure the backend is running on port 5000.'
+        'Unable to connect to the backend API. Please check your network connection or verify the backend service is running.'
       );
       networkError.status = 503;
       throw networkError;

@@ -11,7 +11,7 @@ const protect = async (req, res, next) => {
       // Extract token from Bearer <token>
       token = authHeader.split(' ')[1];
 
-      const secret = process.env.JWT_SECRET || 'collabcode_default_jwt_secret';
+      const secret = process.env.JWT_SECRET || 'collabcode_secret_key_jwt_2026_secure';
       const decoded = jwt.verify(token, secret);
 
       // Fetch user without password field

@@ -125,6 +125,159 @@ export const codeService = {
     request(`/saved-code/${id}`, {
       method: 'DELETE',
     }),
+  executeCode: async (language, code, stdin = '') => {
+    try {
+      // 1. Primary execution via backend API
+      const res = await request('/execute', {
+        method: 'POST',
+        body: JSON.stringify({ language, code, stdin }),
+      });
+      return res;
+    } catch (backendError) {
+      console.warn('Backend execute route reached fallback, running direct sandbox runner:', backendError.message);
+      
+      const toB64 = (str) => {
+        try {
+          return window.btoa(unescape(encodeURIComponent(str || '')));
+        } catch (e) {
+          return window.btoa(str || '');
+        }
+      };
+
+      const fromB64 = (str) => {
+        if (!str) return '';
+        try {
+          return decodeURIComponent(escape(window.atob(str)));
+        } catch (e) {
+          return window.atob(str);
+        }
+      };
+
+      const judge0Ids = {
+        python: 71,
+        py: 71,
+        'c++': 54,
+        cpp: 54,
+        c: 50,
+        java: 62,
+        javascript: 63,
+        js: 63,
+      };
+
+      const normalizedLang = (language || 'javascript').toLowerCase().trim();
+      const langId = judge0Ids[normalizedLang] || 63;
+
+      // 2. Direct Judge0 CE call
+      try {
+        const directRes = await fetch('https://ce.judge0.com/submissions?base64_encoded=true&wait=true', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            language_id: langId,
+            source_code: toB64(code),
+            stdin: toB64(stdin || ''),
+          }),
+        });
+
+        if (directRes.ok) {
+          const data = await directRes.json();
+          const stdout = fromB64(data.stdout);
+          const stderr = fromB64(data.stderr);
+          const compileOutput = fromB64(data.compile_output);
+          const statusDesc = data.status?.description || 'Executed';
+          const statusId = data.status?.id || 0;
+
+          if (compileOutput && compileOutput.trim()) {
+            return {
+              success: true,
+              language: normalizedLang,
+              isError: true,
+              status: 'Compilation Error',
+              stdout: stdout || '',
+              stderr: compileOutput,
+              output: compileOutput,
+              exitCode: 1,
+              time: data.time,
+            };
+          }
+
+          if (statusId !== 3 || stderr) {
+            const isError = statusId !== 3;
+            const combined = stdout + (stderr ? (stdout ? '\n' : '') + stderr : '');
+            return {
+              success: true,
+              language: normalizedLang,
+              isError,
+              status: isError ? statusDesc : 'Success',
+              stdout,
+              stderr,
+              output: combined || (isError ? statusDesc : '(No output)'),
+              exitCode: isError ? (data.exit_code || 1) : 0,
+              time: data.time,
+            };
+          }
+
+          return {
+            success: true,
+            language: normalizedLang,
+            isError: false,
+            status: 'Success',
+            stdout,
+            stderr: '',
+            output: stdout || '(Program executed successfully with no output)',
+            exitCode: 0,
+            time: data.time,
+          };
+        }
+      } catch (clientErr) {
+        console.warn('Direct Judge0 client execution failed:', clientErr.message);
+      }
+
+      // 3. Wandbox fallback
+      const wandboxCompilers = {
+        python: 'cpython-3.12.7',
+        py: 'cpython-3.12.7',
+        'c++': 'gcc-13.2.0',
+        cpp: 'gcc-13.2.0',
+        c: 'gcc-13.2.0-c',
+        java: 'openjdk-jdk-21+35',
+        javascript: 'nodejs-20.17.0',
+        js: 'nodejs-20.17.0',
+      };
+
+      const wbComp = wandboxCompilers[normalizedLang] || 'nodejs-20.17.0';
+      const wbRes = await fetch('https://wandbox.org/api/compile.json', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          compiler: wbComp,
+          code,
+          stdin: stdin || '',
+        }),
+      });
+
+      if (wbRes.ok) {
+        const wbData = await wbRes.json();
+        const compilerError = wbData.compiler_error || wbData.compiler_message || '';
+        const programError = wbData.program_error || '';
+        const programOutput = wbData.program_output || '';
+        const isErr = wbData.status !== '0' || Boolean(compilerError) || Boolean(wbData.signal);
+
+        return {
+          success: true,
+          language: normalizedLang,
+          isError: isErr,
+          status: isErr ? (compilerError ? 'Compilation Error' : 'Runtime Error') : 'Success',
+          stdout: programOutput,
+          stderr: compilerError || programError,
+          output: compilerError || programError || programOutput || '(No output)',
+          exitCode: parseInt(wbData.status, 10) || (isErr ? 1 : 0),
+        };
+      }
+
+      throw new Error('All compiler sandbox engines were unreachable.');
+    }
+  },
 };
 
 export const adminService = {

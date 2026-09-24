@@ -8,6 +8,7 @@ const userRoutes = require('./routes/userRoutes');
 const roomRoutes = require('./routes/roomRoutes');
 const savedCodeRoutes = require('./routes/savedCodeRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const executeRoutes = require('./routes/executeRoutes');
 
 const app = express();
 
@@ -18,6 +19,7 @@ const allowedOrigins = [
   'http://localhost:4173',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:5173',
+  'http://127.0.0.1:4173',
   'https://collab-code-jade.vercel.app',
 ];
 
@@ -28,8 +30,9 @@ const corsOptions = {
     const isExplicitlyAllowed = allowedOrigins.includes(origin);
     const isVercelDomain = origin.endsWith('.vercel.app');
     const isRenderDomain = origin.endsWith('.onrender.com');
+    const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
 
-    if (isExplicitlyAllowed || isVercelDomain || isRenderDomain) {
+    if (isExplicitlyAllowed || isVercelDomain || isRenderDomain || isLocalhost) {
       return callback(null, true);
     }
     // Permissive fallback so legitimate client apps don't get blocked
@@ -45,6 +48,7 @@ const corsOptions = {
     'Origin',
   ],
   exposedHeaders: ['Authorization'],
+  optionsSuccessStatus: 200,
 };
 
 // 1. Primary CORS middleware
@@ -53,25 +57,23 @@ app.use(cors(corsOptions));
 // 2. Preflight handling for all routes
 app.options('*', cors(corsOptions));
 
-// 3. Fallback Header Injector & OPTIONS handler
+// 3. Fail-safe OPTIONS preflight handler
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-  }
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PUT, DELETE, PATCH, OPTIONS'
-  );
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With, Accept, Origin'
-  );
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-
   if (req.method === 'OPTIONS') {
+    const origin = req.headers.origin;
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+    res.setHeader(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+    );
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, X-Requested-With, Accept, Origin'
+    );
+    res.setHeader('Access-Control-Expose-Headers', 'Authorization');
     return res.status(200).end();
   }
   next();
@@ -86,6 +88,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/saved-code', savedCodeRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/execute', executeRoutes);
 
 // Root Welcome Route
 app.get('/', (req, res) => {
@@ -103,6 +106,7 @@ app.get('/', (req, res) => {
       singleRoom: 'GET, PUT, DELETE /api/rooms/:roomId',
       joinRoom: 'POST /api/rooms/:roomId/join',
       savedCode: 'GET, POST /api/saved-code',
+      execute: 'POST /api/execute',
       adminStats: 'GET /api/admin/stats',
       adminUsers: 'GET /api/admin/users',
       adminRooms: 'GET /api/admin/rooms',

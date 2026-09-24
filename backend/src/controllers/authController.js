@@ -3,7 +3,7 @@ const User = require('../models/User');
 
 // Helper to generate JWT token with payload { id, email, role }
 const generateToken = (user) => {
-  const secret = process.env.JWT_SECRET || 'collabcode_default_jwt_secret';
+  const secret = process.env.JWT_SECRET || 'collabcode_secret_key_jwt_2026_secure';
   return jwt.sign(
     {
       id: user._id,

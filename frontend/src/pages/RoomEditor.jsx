@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useApp, getStarterCode } from '../context/AppContext';
-import { roomService } from '../services/api';
+import { roomService, codeService } from '../services/api';
 import {
   Code2,
-  DoorOpen,
   ArrowLeft,
   Save,
   Play,
@@ -13,11 +12,13 @@ import {
   Users,
   Info,
   Terminal,
-  Layers,
-  Sparkles,
+  AlertCircle,
+  CheckCircle2,
+  Share2,
+  Loader2,
+  Keyboard,
   LogOut,
-  Maximize2,
-  RotateCcw
+  RotateCcw,
 } from 'lucide-react';
 
 const RoomEditor = () => {
@@ -32,18 +33,22 @@ const RoomEditor = () => {
       id: roomId || 'ABC123',
       name: 'Collaborative Coding Room',
       description: 'Real-time collaborative code editor session.',
-      language: 'C++',
+      language: 'Python',
       members: [
         { name: 'You', role: 'Host', isOnline: true, color: 'bg-emerald-500' },
       ],
-      code: getStarterCode('C++'),
+      code: getStarterCode('Python'),
     };
   });
 
-  const [language, setLanguage] = useState(currentRoom.language || 'C++');
+  const [language, setLanguage] = useState(currentRoom.language || 'Python');
   const [code, setCode] = useState(currentRoom.code || getStarterCode(language));
+  const [stdin, setStdin] = useState('');
+  const [showStdin, setShowStdin] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const [output, setOutput] = useState('');
+  const [executionResult, setExecutionResult] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const textareaRef = useRef(null);
@@ -55,8 +60,8 @@ const RoomEditor = () => {
         const res = await roomService.getRoomById(roomId);
         if (res && res.room) {
           setCurrentRoom(res.room);
-          setLanguage(res.room.language || 'C++');
-          setCode(res.room.code || getStarterCode(res.room.language || 'C++'));
+          setLanguage(res.room.language || 'Python');
+          setCode(res.room.code || getStarterCode(res.room.language || 'Python'));
         }
       } catch (err) {
         console.warn('Using local room workspace state:', err.message);
@@ -71,6 +76,8 @@ const RoomEditor = () => {
   const handleLanguageChange = (newLang) => {
     setLanguage(newLang);
     setCode(getStarterCode(newLang));
+    setExecutionResult(null);
+    setOutput('');
     showToast(`Switched editor mode to ${newLang}`);
   };
 
@@ -79,6 +86,21 @@ const RoomEditor = () => {
     setCopied(true);
     showToast(`Room ID ${currentRoom.id || roomId} copied to clipboard!`);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyInviteLink = () => {
+    const inviteUrl = window.location.origin + `/rooms/${currentRoom.id || roomId}`;
+    navigator.clipboard.writeText(inviteUrl);
+    setCopiedLink(true);
+    showToast(`Invite link copied! Share with your friends to code together.`);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
+
+  const handleResetCode = () => {
+    if (window.confirm('Reset code to default template?')) {
+      setCode(getStarterCode(language));
+      showToast(`Reset code template for ${language}`);
+    }
   };
 
   const handleSave = async () => {
@@ -110,27 +132,63 @@ const RoomEditor = () => {
     }
   };
 
-  const handleRunCode = () => {
+  // Real Multi-Language Compiler & Execution Engine with Runtime/Syntax Error Detection
+  const handleRunCode = async () => {
     setIsRunning(true);
-    setOutput('Compiling and executing script in cloud sandbox...\n');
+    setOutput('Compiling and executing code in cloud sandbox...\n');
+    setExecutionResult(null);
 
-    setTimeout(() => {
-      setIsRunning(false);
-      let simulatedOutput = '';
-      if (language === 'C++') {
-        simulatedOutput = `[Execution Success - GCC 11.2]\n${currentRoom.name} Running!\nOutputs: [0, 1]\n\nProcess finished with exit code 0`;
-      } else if (language === 'Python') {
-        simulatedOutput = `[Execution Success - Python 3.11]\nCollabCode Python Workspace\nOutput: Prime calculation verified\n\n>>> Program exited safely.`;
-      } else if (language === 'Java') {
-        simulatedOutput = `[Execution Success - OpenJDK 17]\nWelcome to Java Practice Room!\nResult: Execution completed\n\nProcess finished with exit code 0`;
-      } else if (language === 'C') {
-        simulatedOutput = `[Execution Success - C17 Standard]\nHello from CollabCode C Workspace!\n\nProcess finished with exit code 0`;
+    const startTime = performance.now();
+    try {
+      const res = await codeService.executeCode(language, code, stdin);
+      const elapsedMs = Math.round(performance.now() - startTime);
+
+      if (res) {
+        const isErr = Boolean(res.isError || (res.exitCode !== 0 && res.exitCode !== undefined && res.exitCode !== null));
+        const finalOutput = res.output || res.stdout || res.stderr || '(No output returned)';
+
+        const resultObj = {
+          isError: isErr,
+          status: res.status || (isErr ? 'Execution Error' : 'Success'),
+          language: res.language || language,
+          version: res.version || '',
+          stdout: res.stdout || '',
+          stderr: res.stderr || '',
+          output: finalOutput,
+          exitCode: res.exitCode ?? (isErr ? 1 : 0),
+          elapsedMs,
+        };
+
+        setExecutionResult(resultObj);
+        setOutput(finalOutput);
+
+        if (isErr) {
+          showToast(`Execution finished with errors (${resultObj.status})`, 'error');
+        } else {
+          showToast('Code executed successfully!');
+        }
       } else {
-        simulatedOutput = `[Execution Success - Node.js 20.x]\nWelcome to CollabCode JavaScript Editor!\nOutput: 35\nLive cloud sandbox test completed.`;
+        throw new Error('No execution result returned from sandbox.');
       }
-      setOutput(simulatedOutput);
-      showToast('Execution finished successfully!');
-    }, 600);
+    } catch (err) {
+      const elapsedMs = Math.round(performance.now() - startTime);
+      const errorObj = {
+        isError: true,
+        status: 'Runtime Error',
+        language,
+        version: '',
+        stdout: '',
+        stderr: err.message,
+        output: `Error during execution:\n${err.message}`,
+        exitCode: 1,
+        elapsedMs,
+      };
+      setExecutionResult(errorObj);
+      setOutput(`Execution Error:\n${err.message}`);
+      showToast(err.message || 'Execution error encountered', 'error');
+    } finally {
+      setIsRunning(false);
+    }
   };
 
   // Support Tab key indentation inside textarea
@@ -157,7 +215,7 @@ const RoomEditor = () => {
       {/* Top Navbar */}
       <header className="h-16 bg-slate-900 border-b border-slate-800 px-4 sm:px-6 flex items-center justify-between shrink-0 z-20">
         {/* Left: Brand & Room Title */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3 sm:space-x-4">
           <Link
             to="/rooms"
             className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-white bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700 transition"
@@ -175,7 +233,7 @@ const RoomEditor = () => {
             <div>
               <h1 className="text-sm font-bold text-white tracking-tight flex items-center gap-2">
                 {currentRoom.name}
-                <span className="hidden sm:inline-flex text-[10px] font-mono text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.2 rounded font-bold">
+                <span className="hidden sm:inline-flex text-[10px] font-mono text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded font-bold">
                   {currentRoom.id || roomId}
                 </span>
               </h1>
@@ -183,23 +241,40 @@ const RoomEditor = () => {
           </div>
         </div>
 
-        {/* Center/Right: Language, Run, Save, Leave */}
-        <div className="flex items-center space-x-2.5">
+        {/* Center/Right: Language, Run, Stdin Toggle, Save, Invite, Leave */}
+        <div className="flex items-center space-x-2 sm:space-x-2.5">
           {/* Language Selector */}
-          <div className="flex items-center space-x-1.5 bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1">
-            <span className="text-[11px] font-bold text-slate-400">Language:</span>
+          <div className="flex items-center space-x-1.5 bg-slate-950 border border-slate-700 rounded-xl px-2 sm:px-2.5 py-1">
+            <span className="text-[11px] font-bold text-slate-400 hidden sm:inline">Lang:</span>
             <select
               value={language}
               onChange={(e) => handleLanguageChange(e.target.value)}
               className="bg-transparent text-xs font-bold text-emerald-400 focus:outline-none cursor-pointer"
             >
-              <option value="C++" className="bg-slate-900 text-white">C++</option>
-              <option value="C" className="bg-slate-900 text-white">C</option>
-              <option value="Java" className="bg-slate-900 text-white">Java</option>
               <option value="Python" className="bg-slate-900 text-white">Python</option>
+              <option value="C++" className="bg-slate-900 text-white">C++</option>
+              <option value="Java" className="bg-slate-900 text-white">Java</option>
+              <option value="C" className="bg-slate-900 text-white">C</option>
               <option value="JavaScript" className="bg-slate-900 text-white">JavaScript</option>
             </select>
           </div>
+
+          {/* Stdin Toggle Button */}
+          <button
+            onClick={() => setShowStdin((prev) => !prev)}
+            className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
+              showStdin || stdin.trim()
+                ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300'
+                : 'bg-slate-800/80 hover:bg-slate-700/80 border-slate-700 text-slate-300'
+            }`}
+            title="Custom Standard Input (stdin) for input(), Scanner, cin"
+          >
+            <Keyboard className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Input (stdin)</span>
+            {stdin.trim() && (
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+            )}
+          </button>
 
           {/* Run Code Button */}
           <button
@@ -207,18 +282,37 @@ const RoomEditor = () => {
             disabled={isRunning}
             className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs transition shadow-md shadow-emerald-500/15 disabled:opacity-50 cursor-pointer"
           >
-            <Play className="w-3.5 h-3.5 fill-current" />
-            <span className="hidden sm:inline">Run Code</span>
+            {isRunning ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Running...</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Run Code</span>
+              </>
+            )}
           </button>
 
           {/* Save Code Button */}
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-xl text-xs transition cursor-pointer"
+            className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-xl text-xs transition cursor-pointer"
           >
             <Save className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden sm:inline">{isSaving ? 'Saving...' : 'Save Code'}</span>
+            <span>{isSaving ? 'Saving...' : 'Save'}</span>
+          </button>
+
+          {/* Invite Friend Button */}
+          <button
+            onClick={handleCopyInviteLink}
+            className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold rounded-xl text-xs transition cursor-pointer"
+            title="Invite friend to collaborate on this room"
+          >
+            {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
+            <span>{copiedLink ? 'Link Copied!' : 'Invite Friend'}</span>
           </button>
 
           {/* Leave Room Button */}
@@ -230,7 +324,7 @@ const RoomEditor = () => {
             className="flex items-center space-x-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-semibold rounded-xl text-xs transition cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Leave Room</span>
+            <span className="hidden sm:inline">Leave</span>
           </button>
         </div>
       </header>
@@ -246,17 +340,26 @@ const RoomEditor = () => {
               <span className="font-semibold text-emerald-400">
                 solution.{language === 'C++' ? 'cpp' : language === 'Java' ? 'java' : language === 'Python' ? 'py' : language === 'C' ? 'c' : 'js'}
               </span>
-              <span className="text-slate-400 text-[11px]">— MongoDB Synced</span>
+              <span className="text-slate-400 text-[11px] hidden sm:inline">— Live Real Compiler Sandbox</span>
             </div>
-            <span className="text-slate-400 text-[11px]">
-              UTF-8 • {lineCount} lines • Tab: 4 spaces
-            </span>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handleResetCode}
+                className="text-slate-400 hover:text-slate-200 transition flex items-center gap-1 text-[11px] cursor-pointer"
+                title="Reset template code"
+              >
+                <RotateCcw className="w-3 h-3" /> Reset
+              </button>
+              <span className="text-slate-400 text-[11px]">
+                UTF-8 • {lineCount} lines • Tab: 4 spaces
+              </span>
+            </div>
           </div>
 
           {/* Custom Textarea Editor Container */}
           <div className="flex-1 flex overflow-hidden relative bg-slate-950">
             {/* Line Numbers Column */}
-            <div className="w-12 bg-slate-950/90 border-r border-slate-800/80 pt-4 pb-4 select-none text-right pr-3 font-mono text-xs text-slate-400 shrink-0 leading-6">
+            <div className="w-12 bg-slate-950/90 border-r border-slate-800/80 pt-4 pb-4 select-none text-right pr-3 font-mono text-xs text-slate-500 shrink-0 leading-6">
               {lineNumbers.map((n) => (
                 <div key={n}>{n}</div>
               ))}
@@ -276,23 +379,114 @@ const RoomEditor = () => {
             ></textarea>
           </div>
 
-          {/* Simulated Bottom Console Output */}
-          {output && (
-            <div className="h-44 bg-slate-900 border-t border-slate-800 flex flex-col">
-              <div className="flex items-center justify-between px-4 py-2 bg-slate-950 border-b border-slate-800 text-xs font-bold text-slate-400">
-                <span className="flex items-center gap-1.5 text-emerald-400">
-                  <Terminal className="w-3.5 h-3.5" /> Output Terminal
+          {/* Standard Input (stdin) Panel Drawer */}
+          {showStdin && (
+            <div className="h-28 bg-slate-900 border-t border-slate-800 flex flex-col shrink-0">
+              <div className="flex items-center justify-between px-4 py-1.5 bg-slate-950 border-b border-slate-800 text-[11px] font-bold text-slate-400">
+                <span className="flex items-center gap-1.5 text-cyan-400">
+                  <Keyboard className="w-3.5 h-3.5" /> Standard Input (stdin)
                 </span>
-                <button
-                  onClick={() => setOutput('')}
-                  className="text-[11px] text-slate-500 hover:text-slate-300 transition cursor-pointer"
-                >
-                  Clear
-                </button>
+                <span className="text-[10px] text-slate-500">Provided to input() / Scanner / cin on run</span>
               </div>
-              <pre className="flex-1 p-4 font-mono text-xs text-emerald-300/90 overflow-y-auto whitespace-pre-wrap leading-5 bg-slate-950">
-                {output}
-              </pre>
+              <textarea
+                value={stdin}
+                onChange={(e) => setStdin(e.target.value)}
+                placeholder="Enter input data here (each line will be fed to input() / cin / Scanner)..."
+                className="flex-1 w-full bg-slate-950 p-3 font-mono text-xs text-slate-200 resize-none focus:outline-none focus:ring-0 placeholder:text-slate-600"
+              ></textarea>
+            </div>
+          )}
+
+          {/* Compiler & Terminal Execution Console Output */}
+          {(output || isRunning) && (
+            <div className="h-56 bg-slate-900 border-t border-slate-800 flex flex-col shrink-0">
+              {/* Terminal Title Bar with Real Status Badges */}
+              <div className="flex items-center justify-between px-4 py-2 bg-slate-950 border-b border-slate-800 text-xs font-bold text-slate-400">
+                <div className="flex items-center space-x-2.5">
+                  <span className="flex items-center gap-1.5 text-emerald-400">
+                    <Terminal className="w-3.5 h-3.5" /> Output Terminal
+                  </span>
+
+                  {executionResult && (
+                    <div className="flex items-center space-x-2">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          executionResult.isError
+                            ? 'bg-rose-500/15 border border-rose-500/30 text-rose-400'
+                            : 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300'
+                        }`}
+                      >
+                        {executionResult.isError ? (
+                          <>
+                            <AlertCircle className="w-3 h-3 text-rose-400" />
+                            {executionResult.status} (Exit {executionResult.exitCode})
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                            {executionResult.status} (Exit {executionResult.exitCode})
+                          </>
+                        )}
+                      </span>
+
+                      {executionResult.version && (
+                        <span className="hidden sm:inline-flex text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded font-mono">
+                          {executionResult.language} {executionResult.version}
+                        </span>
+                      )}
+
+                      {executionResult.elapsedMs !== undefined && (
+                        <span className="hidden md:inline-flex text-[10px] text-slate-500">
+                          {executionResult.elapsedMs}ms
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => {
+                      setOutput('');
+                      setExecutionResult(null);
+                    }}
+                    className="text-[11px] text-slate-500 hover:text-slate-300 transition cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+
+              {/* Terminal Body */}
+              <div className="flex-1 p-4 font-mono text-xs overflow-y-auto whitespace-pre-wrap leading-5 bg-slate-950 selection:bg-slate-800">
+                {isRunning ? (
+                  <div className="flex items-center space-x-2 text-cyan-400">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Compiling code and executing in sandbox engine...</span>
+                  </div>
+                ) : executionResult?.isError ? (
+                  <div className="space-y-2">
+                    <pre className="text-rose-400 font-medium">
+                      {output}
+                    </pre>
+                    <div className="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-center justify-between">
+                      <span className="text-amber-400/90 flex items-center gap-1">
+                        ⚠️ Code encountered an error. Check syntax, variable names, or missing inputs.
+                      </span>
+                      <button
+                        onClick={handleCopyInviteLink}
+                        className="text-cyan-400 hover:text-cyan-300 underline cursor-pointer"
+                      >
+                        Invite friend to help debug
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <pre className="text-emerald-300/95 font-medium">
+                    {output}
+                  </pre>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -377,12 +571,32 @@ const RoomEditor = () => {
                 </div>
               </div>
             </div>
+
+            {/* Invite Friend Card */}
+            <div className="p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-500/20 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                  <Share2 className="w-3.5 h-3.5" /> Call a Friend
+                </span>
+                <span className="text-[10px] text-indigo-400">Real-time</span>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Send this room link or Room ID to a friend to collaborate and debug errors together.
+              </p>
+              <button
+                onClick={handleCopyInviteLink}
+                className="w-full py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/40 text-indigo-200 text-xs font-semibold rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                {copiedLink ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                <span>{copiedLink ? 'Invite Link Copied!' : 'Copy Invite Link'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Quick Helper Tips */}
           <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/60 text-[11px] text-slate-400 space-y-1">
             <span className="font-semibold text-slate-300 block">💡 Pro Tip:</span>
-            <p>Click <strong className="text-cyan-300">Save Code</strong> to sync your latest solution changes to MongoDB Atlas.</p>
+            <p>If your code uses <code className="text-cyan-300 font-mono">input()</code> or <code className="text-cyan-300 font-mono">cin</code>, click <strong className="text-cyan-300">Input (stdin)</strong> to provide input values before running.</p>
           </div>
         </div>
       </div>

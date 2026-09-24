@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import {
   User,
   Mail,
@@ -18,19 +19,21 @@ import {
 
 const Profile = () => {
   const { currentUser, updateProfile, showToast, rooms, savedCode } = useApp();
+  const { logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(currentUser.name);
-  const [email, setEmail] = useState(currentUser.email);
+  const [name, setName] = useState(currentUser?.name || '');
+  const [email, setEmail] = useState(currentUser?.email || '');
   const navigate = useNavigate();
 
-  const handleSaveProfile = (e) => {
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
-    updateProfile({ name, email });
+    await updateProfile({ name, email });
     setIsEditing(false);
   };
 
   const handleLogout = () => {
-    showToast('Logged out of demo session.');
+    logout();
+    showToast('Logged out of session.');
     navigate('/login');
   };
 
@@ -42,32 +45,36 @@ const Profile = () => {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-2xl shadow-lg shadow-emerald-500/20">
-                {currentUser.avatar || 'M'}
+                {currentUser?.avatar || (currentUser?.name ? currentUser.name[0].toUpperCase() : 'U')}
               </div>
               <div>
                 <div className="flex items-center space-x-2">
                   <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    {currentUser.name}
+                    {currentUser?.name || 'Developer'}
                   </h1>
                   <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    {currentUser.role}
+                    {currentUser?.role || 'USER'}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 mt-1">{currentUser.email}</p>
+                <p className="text-xs text-slate-400 mt-1">{currentUser?.email}</p>
               </div>
             </div>
 
             <div className="flex items-center space-x-3">
               <button
-                onClick={() => setIsEditing(true)}
-                className="flex items-center space-x-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-xl text-xs transition"
+                onClick={() => {
+                  setName(currentUser.name);
+                  setEmail(currentUser.email);
+                  setIsEditing(true);
+                }}
+                className="flex items-center space-x-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-xl text-xs transition cursor-pointer"
               >
                 <Edit3 className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Edit Profile</span>
               </button>
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-1.5 px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-semibold rounded-xl text-xs transition"
+                className="flex items-center space-x-1.5 px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-semibold rounded-xl text-xs transition cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Logout</span>
@@ -82,7 +89,7 @@ const Profile = () => {
           <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center space-x-2">
               <User className="w-4 h-4 text-emerald-400" />
-              <span>Personal Details</span>
+              <span>Personal Details (MongoDB)</span>
             </h2>
 
             <div className="space-y-3">
@@ -90,7 +97,7 @@ const Profile = () => {
                 <span className="text-[11px] uppercase font-bold text-slate-400 block mb-1">
                   Full Name
                 </span>
-                <span className="text-sm font-semibold text-white">{currentUser.name}</span>
+                <span className="text-sm font-semibold text-white">{currentUser?.name}</span>
               </div>
 
               <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800/80">
@@ -99,7 +106,7 @@ const Profile = () => {
                 </span>
                 <div className="flex items-center space-x-2">
                   <Mail className="w-4 h-4 text-slate-400" />
-                  <span className="text-sm font-semibold text-slate-200">{currentUser.email}</span>
+                  <span className="text-sm font-semibold text-slate-200">{currentUser?.email}</span>
                 </div>
               </div>
 
@@ -109,7 +116,7 @@ const Profile = () => {
                 </span>
                 <div className="flex items-center space-x-2">
                   <Shield className="w-4 h-4 text-purple-400" />
-                  <span className="text-sm font-bold text-emerald-400">{currentUser.role}</span>
+                  <span className="text-sm font-bold text-emerald-400">{currentUser?.role}</span>
                 </div>
               </div>
 
@@ -120,7 +127,7 @@ const Profile = () => {
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4 text-cyan-400" />
                   <span className="text-sm font-semibold text-slate-300">
-                    {currentUser.memberSince}
+                    {currentUser?.memberSince || 'Recent'}
                   </span>
                 </div>
               </div>
@@ -139,7 +146,7 @@ const Profile = () => {
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center">
                   <span className="text-2xl font-black text-white">{rooms.length}</span>
                   <span className="text-[11px] text-slate-400 block font-semibold mt-1">
-                    Rooms Joined
+                    Rooms Active
                   </span>
                 </div>
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center">
@@ -152,16 +159,19 @@ const Profile = () => {
 
               <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl space-y-2">
                 <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" /> FSD College Project Milestone
+                  <Sparkles className="w-3.5 h-3.5" /> FSD College Project Live Backend
                 </span>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Phase 1 complete with clean modular React architecture, full responsive navigation, and developer coding tools.
+                  Real database persistence active via MongoDB Atlas & Express REST API with JWT authorization.
                 </p>
               </div>
             </div>
 
             <div className="text-xs text-slate-400 text-center">
-              CollabCode User ID: <code className="font-mono text-emerald-300">USR-2026-M404</code>
+              User ID:{' '}
+              <code className="font-mono text-emerald-300">
+                {currentUser?.id || currentUser?._id || 'USR-LIVE'}
+              </code>
             </div>
           </div>
         </div>

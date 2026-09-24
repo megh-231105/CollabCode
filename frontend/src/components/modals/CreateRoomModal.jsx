@@ -6,6 +6,7 @@ import { X, Code2, Sparkles, Layers } from 'lucide-react';
 const CreateRoomModal = () => {
   const { isCreateModalOpen, setIsCreateModalOpen, createRoom } = useApp();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -15,14 +16,21 @@ const CreateRoomModal = () => {
 
   if (!isCreateModalOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
 
-    const newRoom = createRoom(formData);
-    setIsCreateModalOpen(false);
-    setFormData({ name: '', description: '', language: 'C++' });
-    navigate(`/rooms/${newRoom.id}`);
+    setLoading(true);
+    try {
+      const newRoom = await createRoom(formData);
+      setIsCreateModalOpen(false);
+      setFormData({ name: '', description: '', language: 'C++' });
+      if (newRoom && (newRoom.id || newRoom.roomId)) {
+        navigate(`/rooms/${newRoom.id || newRoom.roomId}`);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -36,12 +44,12 @@ const CreateRoomModal = () => {
             </div>
             <div>
               <h3 className="text-xl font-bold text-white tracking-tight">Create New Room</h3>
-              <p className="text-xs text-slate-400">Launch a collaborative workspace for your team</p>
+              <p className="text-xs text-slate-400">Launch a collaborative workspace for your team in MongoDB Atlas</p>
             </div>
           </div>
           <button
             onClick={() => setIsCreateModalOpen(false)}
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
+            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -106,15 +114,16 @@ const CreateRoomModal = () => {
             <button
               type="button"
               onClick={() => setIsCreateModalOpen(false)}
-              className="px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition"
+              className="px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl transition shadow-lg shadow-emerald-500/20"
+              disabled={loading}
+              className="px-6 py-2.5 text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
             >
-              Create Room
+              {loading ? 'Creating...' : 'Create Room'}
             </button>
           </div>
         </form>

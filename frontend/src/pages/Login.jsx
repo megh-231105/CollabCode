@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
+import { authService } from '../services/api';
 import {
   Code2,
   Mail,
@@ -9,44 +11,57 @@ import {
   Terminal,
   CheckCircle2,
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  AlertCircle
 } from 'lucide-react';
 
 const Login = () => {
-  const [email, setEmail] = useState('meghana@example.com');
-  const [password, setPassword] = useState('123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { showToast, setCurrentUser } = useApp();
+  const { login } = useAuth();
+  const { showToast, refreshData } = useApp();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError('');
+
+    if (!email.trim() || !password) {
+      setError('Please provide both email and password.');
+      return;
+    }
+
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const res = await authService.login(email.trim(), password);
+
       setLoading(false);
-      setCurrentUser({
-        name: 'Meghana',
-        email: email || 'meghana@example.com',
-        role: 'USER',
-        avatar: 'M',
-        memberSince: 'September 2026',
-      });
-      showToast('Welcome back, Meghana!');
-      navigate('/dashboard');
-    }, 600);
+
+      if (res.token && res.user) {
+        login(res.token, res.user);
+        await refreshData();
+        showToast(`Welcome back, ${res.user.name}!`);
+
+        if (res.user.role === 'ADMIN') {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
+      }
+    } catch (err) {
+      setLoading(false);
+      setError(
+        err.message || 'Invalid email or password. Please verify your credentials.'
+      );
+    }
   };
 
   const fillAdmin = () => {
-    setEmail('admin@gmail.com');
+    setEmail('admin@collabcode.dev');
     setPassword('admin123');
-    setCurrentUser({
-      name: 'Admin',
-      email: 'admin@gmail.com',
-      role: 'ADMIN',
-      avatar: 'A',
-      memberSince: 'August 2026',
-    });
   };
 
   return (
@@ -76,14 +91,14 @@ const Login = () => {
         <div className="z-10 my-auto max-w-md">
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs text-emerald-400 font-semibold mb-6">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Real-time Multi-User Editor</span>
+            <span>MongoDB Atlas Full-Stack Architecture</span>
           </div>
 
           <h2 className="text-3xl font-black text-white tracking-tight mb-4">
             Where Developers Think & Code Together
           </h2>
           <p className="text-slate-400 text-sm leading-relaxed mb-8">
-            Create multi-language coding rooms in seconds. Share your ideas, practice complex data structures, and keep your solutions organized.
+            Create multi-language coding rooms in seconds. Share your ideas, practice complex data structures, and keep your solutions organized with cloud persistence.
           </p>
 
           {/* Snippet Preview Card */}
@@ -99,7 +114,7 @@ const Login = () => {
             <p className="text-purple-400">#include &lt;iostream&gt;</p>
             <p className="text-blue-400">int main() &#123;</p>
             <p className="pl-4 text-emerald-300">std::cout &lt;&lt; "Welcome back!" &lt;&lt; std::endl;</p>
-            <p className="pl-4 text-slate-500">// Ready to start coding?</p>
+            <p className="pl-4 text-slate-500">// Connected to MongoDB Atlas</p>
             <p className="text-blue-400">&#125;</p>
           </div>
         </div>
@@ -107,7 +122,7 @@ const Login = () => {
         {/* Footer info */}
         <div className="z-10 text-xs text-slate-400 flex items-center justify-between">
           <span>Final Year FSD Project</span>
-          <span>Phase 1 UI Ready</span>
+          <span>Live Express + MongoDB</span>
         </div>
       </div>
 
@@ -133,35 +148,18 @@ const Login = () => {
             </p>
           </div>
 
-          {/* Quick Mock Auto-Fill helper */}
-          <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs flex items-center justify-between">
-            <span className="text-slate-400">Quick Demo User:</span>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail('meghana@example.com');
-                  setPassword('123456');
-                }}
-                className="px-2 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded font-semibold transition"
-              >
-                User (Meghana)
-              </button>
-              <button
-                type="button"
-                onClick={fillAdmin}
-                className="px-2 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded font-semibold transition"
-              >
-                Admin
-              </button>
+          {error && (
+            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center space-x-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{error}</span>
             </div>
-          </div>
+          )}
 
           <form onSubmit={handleLogin} className="space-y-5">
             {/* Email Field */}
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-                Email
+                Email Address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -184,9 +182,9 @@ const Login = () => {
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
                   Password
                 </label>
-                <a href="#" className="text-xs text-emerald-400 hover:text-emerald-300 font-medium">
-                  Forgot password?
-                </a>
+                <span className="text-xs text-slate-500">
+                  Min 6 characters
+                </span>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">

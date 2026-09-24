@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/layout/AdminLayout';
 import { useApp } from '../../context/AppContext';
+import { adminService } from '../../services/api';
 import {
   DoorOpen,
   Search,
@@ -11,53 +12,54 @@ import {
   Users,
   ExternalLink,
   Layers,
-  Plus
+  Plus,
+  Loader2
 } from 'lucide-react';
 
 const AdminRooms = () => {
-  const { rooms, deleteRoom, setIsCreateModalOpen, showToast } = useApp();
+  const { deleteRoom, setIsCreateModalOpen, showToast } = useApp();
+  const [roomsList, setRoomsList] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const adminRoomsData = [
-    {
-      id: 'ABC123',
-      name: 'DSA Practice',
-      owner: 'Meghana',
-      language: 'C++',
-      members: 2,
-      status: 'Active',
-    },
-    {
-      id: 'JAVA404',
-      name: 'Java Practice',
-      owner: 'Rahul',
-      language: 'Java',
-      members: 3,
-      status: 'Active',
-    },
-    {
-      id: 'PY7890',
-      name: 'Python Room',
-      owner: 'Anu',
-      language: 'Python',
-      members: 4,
-      status: 'Active',
-    },
-    {
-      id: 'JS2026',
-      name: 'Full Stack JS Live',
-      owner: 'Meghana',
-      language: 'JavaScript',
-      members: 2,
-      status: 'Active',
-    },
-  ];
+  const fetchRooms = async () => {
+    try {
+      const res = await adminService.getRooms();
+      if (res && res.rooms) {
+        setRoomsList(res.rooms);
+      }
+    } catch (err) {
+      console.warn('Failed to load admin rooms:', err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const filtered = adminRoomsData.filter((r) =>
-    r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.owner.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.language.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
+  const filtered = roomsList.filter((r) => {
+    const nameMatch = (r.name || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const ownerMatch = (r.owner || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const langMatch = (r.language || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const idMatch = (r.id || '').toLowerCase().includes(searchTerm.toLowerCase());
+    return nameMatch || ownerMatch || langMatch || idMatch;
+  });
+
+  const handleDeleteRoom = async (roomId, roomName) => {
+    if (!window.confirm(`Are you sure you want to remove room "${roomName}" from MongoDB?`)) {
+      return;
+    }
+
+    try {
+      await adminService.deleteRoom(roomId);
+      setRoomsList((prev) => prev.filter((r) => r.id !== roomId && r._id !== roomId));
+      showToast(`Room "${roomName}" removed from database.`);
+    } catch (err) {
+      showToast(err.message || 'Error deleting room', 'error');
+    }
+  };
 
   return (
     <AdminLayout>
@@ -69,13 +71,13 @@ const AdminRooms = () => {
               Coding Rooms Moderation
             </h1>
             <p className="mt-1 text-sm text-slate-400">
-              Inspect active coding rooms, review language workloads, and manage sessions.
+              Inspect active coding rooms, review language workloads, and manage sessions in MongoDB Atlas.
             </p>
           </div>
 
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-purple-600/20"
+            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-purple-600/20 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Create New Room</span>
@@ -99,79 +101,87 @@ const AdminRooms = () => {
         {/* Rooms Table */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-300">
-              <thead className="bg-slate-950 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-800">
-                <tr>
-                  <th className="py-4 px-6 font-bold">Room Name</th>
-                  <th className="py-4 px-6 font-bold">Owner</th>
-                  <th className="py-4 px-6 font-bold">Language</th>
-                  <th className="py-4 px-6 font-bold">Members</th>
-                  <th className="py-4 px-6 font-bold">Status</th>
-                  <th className="py-4 px-6 font-bold text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                {filtered.map((room) => (
-                  <tr
-                    key={room.id}
-                    className="hover:bg-slate-800/40 transition duration-150"
-                  >
-                    <td className="py-4 px-6 font-bold text-white">
-                      <div className="flex items-center space-x-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-slate-800 text-purple-300 flex items-center justify-center font-bold text-xs">
-                          <DoorOpen className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <span>{room.name}</span>
-                          <span className="block text-[10px] font-mono text-slate-400">
-                            ID: {room.id}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6 font-semibold text-slate-200">{room.owner}</td>
-                    <td className="py-4 px-6">
-                      <span className="inline-flex px-2.5 py-0.5 rounded text-[11px] font-bold font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                        {room.language}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 font-semibold text-slate-300">
-                      <span className="flex items-center gap-1.5">
-                        <Users className="w-3.5 h-3.5 text-slate-400" />
-                        {room.members}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="inline-flex items-center space-x-1.5 text-xs text-emerald-400 font-medium">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                        <span>{room.status}</span>
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-right">
-                      <div className="inline-flex items-center space-x-2">
-                        <Link
-                          to={`/rooms/${room.id}`}
-                          className="flex items-center space-x-1 px-3 py-1.5 bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-slate-200 rounded-lg text-xs font-semibold transition"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>Inspect</span>
-                        </Link>
-                        <button
-                          onClick={() => {
-                            deleteRoom(room.id);
-                            showToast(`Room ${room.name} removed by admin.`);
-                          }}
-                          className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition"
-                          title="Delete Room"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
+            {loading ? (
+              <div className="p-12 text-center text-slate-400 flex flex-col items-center justify-center space-y-3">
+                <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+                <span className="text-xs">Loading coding rooms from MongoDB Atlas...</span>
+              </div>
+            ) : filtered.length > 0 ? (
+              <table className="w-full text-left text-sm text-slate-300">
+                <thead className="bg-slate-950 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-800">
+                  <tr>
+                    <th className="py-4 px-6 font-bold">Room Name</th>
+                    <th className="py-4 px-6 font-bold">Owner</th>
+                    <th className="py-4 px-6 font-bold">Language</th>
+                    <th className="py-4 px-6 font-bold">Members</th>
+                    <th className="py-4 px-6 font-bold">Status</th>
+                    <th className="py-4 px-6 font-bold text-right">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {filtered.map((room) => (
+                    <tr
+                      key={room.id || room._id}
+                      className="hover:bg-slate-800/40 transition duration-150"
+                    >
+                      <td className="py-4 px-6 font-bold text-white">
+                        <div className="flex items-center space-x-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-slate-800 text-purple-300 flex items-center justify-center font-bold text-xs">
+                            <DoorOpen className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <span>{room.name}</span>
+                            <span className="block text-[10px] font-mono text-slate-400">
+                              ID: {room.id}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-6 font-semibold text-slate-200">{room.owner}</td>
+                      <td className="py-4 px-6">
+                        <span className="inline-flex px-2.5 py-0.5 rounded text-[11px] font-bold font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                          {room.language}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 font-semibold text-slate-300">
+                        <span className="flex items-center gap-1.5">
+                          <Users className="w-3.5 h-3.5 text-slate-400" />
+                          {room.members || 1}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className="inline-flex items-center space-x-1.5 text-xs text-emerald-400 font-medium">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                          <span>{room.status || 'Active'}</span>
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <div className="inline-flex items-center space-x-2">
+                          <Link
+                            to={`/rooms/${room.id}`}
+                            className="flex items-center space-x-1 px-3 py-1.5 bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-slate-200 rounded-lg text-xs font-semibold transition"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>Inspect</span>
+                          </Link>
+                          <button
+                            onClick={() => handleDeleteRoom(room.id || room._id, room.name)}
+                            className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition cursor-pointer"
+                            title="Delete Room"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="p-10 text-center text-slate-400 text-xs">
+                No rooms found matching query
+              </div>
+            )}
           </div>
         </div>
       </div>

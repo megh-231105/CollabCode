@@ -4,36 +4,36 @@ import { authService } from '../services/api';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('collabcode_user');
+    try {
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [token, setToken] = useState(() => localStorage.getItem('collabcode_token'));
   const [loading, setLoading] = useState(true);
 
-  // Initialize and verify authentication state on page load
+  // Validate session on app initialization
   useEffect(() => {
     const initializeAuth = async () => {
       const storedToken = localStorage.getItem('collabcode_token');
-      const storedUser = localStorage.getItem('collabcode_user');
 
       if (storedToken) {
         setToken(storedToken);
-        if (storedUser) {
-          try {
-            setUser(JSON.parse(storedUser));
-          } catch (e) {
-            console.error('Failed to parse cached user');
-          }
-        }
-
-        // Validate token with backend /api/auth/me
         try {
           const res = await authService.getMe();
-          if (res.user) {
+          if (res && res.user) {
             setUser(res.user);
             localStorage.setItem('collabcode_user', JSON.stringify(res.user));
           }
         } catch (error) {
-          console.warn('Session expired or invalid token:', error.message);
-          logout();
+          console.warn('Session expired or backend offline:', error.message);
+          // If token explicitly expired (401), log out
+          if (error.status === 401) {
+            logout();
+          }
         }
       }
       setLoading(false);
@@ -60,6 +60,7 @@ export const AuthProvider = ({ children }) => {
     user,
     token,
     isAuthenticated: !!token && !!user,
+    isAdmin: user?.role === 'ADMIN',
     loading,
     login,
     logout,

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { authService } from '../services/api';
 import {
   Code2,
   User,
@@ -9,7 +10,8 @@ import {
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
-  Sparkles
+  Sparkles,
+  AlertCircle
 } from 'lucide-react';
 
 const Register = () => {
@@ -24,31 +26,54 @@ const Register = () => {
   const navigate = useNavigate();
   const { showToast } = useApp();
 
-  const handleSubmit = (e) => {
+  const validateEmail = (email) => {
+    return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-      setError('Please fill in all fields.');
+    // Field Validations
+    if (!formData.name.trim() || !formData.email.trim() || !formData.password) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+
+    if (!validateEmail(formData.email)) {
+      setError('Please enter a valid email address.');
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters.');
+      setError('Password must be at least 6 characters long.');
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match.');
+      setError('Passwords do not match. Please verify.');
       return;
     }
 
     setLoading(true);
-    setTimeout(() => {
+
+    try {
+      const res = await authService.register(
+        formData.name.trim(),
+        formData.email.trim(),
+        formData.password
+      );
+
       setLoading(false);
-      showToast('Account created successfully! Please login.');
+      showToast(res.message || 'Registration successful! Please login.');
       navigate('/login');
-    }, 600);
+    } catch (err) {
+      setLoading(false);
+      setError(
+        err.message ||
+        'Registration failed. Please check your internet connection or try again.'
+      );
+    }
   };
 
   return (
@@ -87,21 +112,21 @@ const Register = () => {
           <div className="space-y-3 mt-6">
             <div className="flex items-start space-x-3 text-slate-300 text-sm">
               <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-              <span>Instant coding rooms with unique Room IDs</span>
+              <span>MongoDB Atlas live user & room data storage</span>
             </div>
             <div className="flex items-start space-x-3 text-slate-300 text-sm">
               <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-              <span>Support for C, C++, Java, Python, and JavaScript</span>
+              <span>Multi-language coding workspace with C, C++, Java, Python, JS</span>
             </div>
             <div className="flex items-start space-x-3 text-slate-300 text-sm">
               <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-              <span>Personal catalog to save and organize algorithms</span>
+              <span>JWT Authentication & bcrypt encrypted passwords</span>
             </div>
           </div>
         </div>
 
         <div className="z-10 text-xs text-slate-400">
-          CollabCode — Collaborative Code Editor
+          CollabCode — Full-Stack College Project
         </div>
       </div>
 
@@ -123,13 +148,14 @@ const Register = () => {
               Create Your Account
             </h1>
             <p className="mt-2 text-sm text-slate-400">
-              Set up your developer profile to start collaborating.
+              Set up your developer profile to start collaborating on MongoDB Atlas.
             </p>
           </div>
 
           {error && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs">
-              {error}
+            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center space-x-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 

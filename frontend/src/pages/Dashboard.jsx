@@ -28,14 +28,14 @@ const Dashboard = () => {
   const stats = [
     {
       title: 'My Rooms',
-      value: rooms.length || 4,
+      value: rooms.length,
       icon: DoorOpen,
       color: 'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-emerald-500/30',
       link: '/rooms',
     },
     {
       title: 'Saved Code',
-      value: savedCode.length >= 4 ? 12 : savedCode.length,
+      value: savedCode.length,
       icon: Bookmark,
       color: 'from-cyan-500/20 to-blue-500/10 text-cyan-400 border-cyan-500/30',
       link: '/saved-code',
@@ -62,10 +62,10 @@ const Dashboard = () => {
             <div>
               <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-950 border border-slate-700 text-xs text-emerald-400 font-semibold mb-3">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Student Developer Workspace</span>
+                <span>MongoDB Atlas Live Data Workspace</span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-                Welcome back, {currentUser.name} 👋
+                Welcome back, {currentUser?.name || 'Developer'} 👋
               </h1>
               <p className="mt-1.5 text-slate-300 text-sm sm:text-base font-medium">
                 Ready to start coding? Collaborate with peers or continue your algorithm practice.
@@ -76,14 +76,14 @@ const Dashboard = () => {
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="flex items-center space-x-2 px-5 py-3 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 hover:scale-[1.02]"
+                className="flex items-center space-x-2 px-5 py-3 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 hover:scale-[1.02] cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[2.5]" />
                 <span>Create Room</span>
               </button>
               <button
                 onClick={() => setIsJoinModalOpen(true)}
-                className="flex items-center space-x-2 px-5 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 font-bold rounded-xl text-sm transition hover:scale-[1.02]"
+                className="flex items-center space-x-2 px-5 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 font-bold rounded-xl text-sm transition hover:scale-[1.02] cursor-pointer"
               >
                 <LogIn className="w-4 h-4 stroke-[2.5]" />
                 <span>Join Room</span>
@@ -130,7 +130,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-white tracking-tight">Recent Rooms</h2>
-              <p className="text-xs text-slate-400">Jump back into your active coding sessions</p>
+              <p className="text-xs text-slate-400">Jump back into your active coding sessions stored in MongoDB Atlas</p>
             </div>
             <Link
               to="/rooms"
@@ -141,56 +141,71 @@ const Dashboard = () => {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {rooms.slice(0, 3).map((room) => (
-              <div
-                key={room.id}
-                className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition hover:shadow-xl group"
+          {rooms.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {rooms.slice(0, 3).map((room) => (
+                <div
+                  key={room.id || room._id}
+                  className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition hover:shadow-xl group"
+                >
+                  <div>
+                    {/* Top Tags */}
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="px-2.5 py-1 rounded-md text-[11px] font-bold font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                        {room.language}
+                      </span>
+                      <span className="text-[11px] font-mono text-slate-400">
+                        ID: {room.id}
+                      </span>
+                    </div>
+
+                    {/* Room Name & Description */}
+                    <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition mb-1.5 tracking-tight">
+                      {room.name}
+                    </h3>
+                    <p className="text-xs text-slate-400 line-clamp-2 mb-4 leading-relaxed">
+                      {room.description || 'Collaborative coding session on MongoDB.'}
+                    </p>
+                  </div>
+
+                  {/* Metadata & Open Action */}
+                  <div className="pt-4 border-t border-slate-800/80 space-y-4">
+                    <div className="flex items-center justify-between text-xs text-slate-400">
+                      <div className="flex items-center space-x-1.5">
+                        <Users className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>{room.members ? room.members.length : 1} Members</span>
+                      </div>
+                      <div className="flex items-center space-x-1.5">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{room.lastUpdated || 'Recently'}</span>
+                      </div>
+                    </div>
+
+                    <Link
+                      to={`/rooms/${room.id}`}
+                      className="w-full flex items-center justify-center space-x-2 py-2.5 bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-slate-200 border border-slate-700 hover:border-emerald-500 font-bold rounded-xl text-xs transition duration-150"
+                    >
+                      <span>Open Room</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-8 text-center bg-slate-900/40 border border-slate-800/80 rounded-2xl space-y-3">
+              <DoorOpen className="w-8 h-8 text-slate-500 mx-auto" />
+              <h3 className="text-sm font-bold text-white">No coding rooms found</h3>
+              <p className="text-xs text-slate-400">Create your first collaborative room to get started!</p>
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="inline-flex items-center space-x-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs transition"
               >
-                <div>
-                  {/* Top Tags */}
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="px-2.5 py-1 rounded-md text-[11px] font-bold font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                      {room.language}
-                    </span>
-                    <span className="text-[11px] font-mono text-slate-400">
-                      ID: {room.id}
-                    </span>
-                  </div>
-
-                  {/* Room Name & Description */}
-                  <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition mb-1.5 tracking-tight">
-                    {room.name}
-                  </h3>
-                  <p className="text-xs text-slate-400 line-clamp-2 mb-4 leading-relaxed">
-                    {room.description}
-                  </p>
-                </div>
-
-                {/* Metadata & Open Action */}
-                <div className="pt-4 border-t border-slate-800/80 space-y-4">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <div className="flex items-center space-x-1.5">
-                      <Users className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>{room.members.length} Members</span>
-                    </div>
-                    <div className="flex items-center space-x-1.5">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Updated {room.lastUpdated}</span>
-                    </div>
-                  </div>
-
-                  <Link
-                    to={`/rooms/${room.id}`}
-                    className="w-full flex items-center justify-center space-x-2 py-2.5 bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-slate-200 border border-slate-700 hover:border-emerald-500 font-bold rounded-xl text-xs transition duration-150"
-                  >
-                    <span>Open Room</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
+                <Plus className="w-3.5 h-3.5" />
+                <span>Create New Room</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </AppLayout>

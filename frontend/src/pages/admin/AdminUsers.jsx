@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
 import { useApp } from '../../context/AppContext';
+import { adminService } from '../../services/api';
 import {
   Users,
   Search,
@@ -11,27 +12,56 @@ import {
   CheckCircle2,
   X,
   UserCheck,
-  Mail
+  Mail,
+  Loader2
 } from 'lucide-react';
 
 const AdminUsers = () => {
-  const { adminUsers, setAdminUsers, showToast } = useApp();
+  const { showToast } = useApp();
+  const [usersList, setUsersList] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const filteredUsers = adminUsers.filter((u) => {
-    const matchesSearch =
-      u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase());
+  const fetchUsers = async () => {
+    try {
+      const res = await adminService.getUsers();
+      if (res && res.users) {
+        setUsersList(res.users);
+      }
+    } catch (err) {
+      console.warn('Failed to load users from backend:', err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const filteredUsers = usersList.filter((u) => {
+    const nameMatch = (u.name || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const emailMatch = (u.email || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = nameMatch || emailMatch;
     const matchesRole = roleFilter === 'ALL' || u.role === roleFilter;
     return matchesSearch && matchesRole;
   });
 
-  const handleDeleteUser = (userId, userName) => {
-    setAdminUsers(adminUsers.filter((u) => u.id !== userId));
-    showToast(`User "${userName}" removed from system.`);
-    if (selectedUser?.id === userId) setSelectedUser(null);
+  const handleDeleteUser = async (userId, userName) => {
+    if (!window.confirm(`Are you sure you want to remove user "${userName}" from MongoDB?`)) {
+      return;
+    }
+
+    try {
+      await adminService.deleteUser(userId);
+      setUsersList((prev) => prev.filter((u) => u.id !== userId && u._id !== userId));
+      showToast(`User "${userName}" removed from database.`);
+      if (selectedUser?.id === userId || selectedUser?._id === userId) setSelectedUser(null);
+    } catch (err) {
+      showToast(err.message || 'Error deleting user', 'error');
+    }
   };
 
   return (
@@ -44,11 +74,11 @@ const AdminUsers = () => {
               Users Management
             </h1>
             <p className="mt-1 text-sm text-slate-400">
-              Inspect user roles, monitor account status, and manage registration directory.
+              Inspect user roles, monitor account status, and manage registration directory from MongoDB Atlas.
             </p>
           </div>
           <div className="text-xs text-slate-400 bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl">
-            Total Registered Users: <span className="text-purple-400 font-bold">{adminUsers.length}</span>
+            Total Registered Users: <span className="text-purple-400 font-bold">{usersList.length}</span>
           </div>
         </div>
 
@@ -77,7 +107,7 @@ const AdminUsers = () => {
               <button
                 key={role}
                 onClick={() => setRoleFilter(role)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                   roleFilter === role
                     ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
                     : 'bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800'
@@ -92,67 +122,78 @@ const AdminUsers = () => {
         {/* Users Table */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-300">
-              <thead className="bg-slate-950 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-800">
-                <tr>
-                  <th className="py-4 px-6 font-bold">Name</th>
-                  <th className="py-4 px-6 font-bold">Email</th>
-                  <th className="py-4 px-6 font-bold">Role</th>
-                  <th className="py-4 px-6 font-bold">Status</th>
-                  <th className="py-4 px-6 font-bold text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                {filteredUsers.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="hover:bg-slate-800/40 transition duration-150"
-                  >
-                    <td className="py-4 px-6 font-semibold text-white flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-slate-800 text-purple-300 border border-purple-500/20 flex items-center justify-center font-bold text-xs">
-                        {user.name[0]}
-                      </div>
-                      <span>{user.name}</span>
-                    </td>
-                    <td className="py-4 px-6 font-mono text-xs text-slate-300">{user.email}</td>
-                    <td className="py-4 px-6">
-                      <span
-                        className={`inline-flex px-2.5 py-0.5 rounded text-[11px] font-bold ${
-                          user.role === 'ADMIN'
-                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                            : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                        }`}
-                      >
-                        {user.role}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="inline-flex items-center space-x-1.5 text-xs text-emerald-400 font-medium">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                        <span>{user.status}</span>
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-right">
-                      <div className="inline-flex items-center space-x-2">
-                        <button
-                          onClick={() => setSelectedUser(user)}
-                          className="px-3 py-1.5 bg-slate-800 hover:bg-purple-600 hover:text-white text-slate-300 rounded-lg text-xs font-semibold transition"
-                        >
-                          View
-                        </button>
-                        <button
-                          onClick={() => handleDeleteUser(user.id, user.name)}
-                          className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition"
-                          title="Delete User"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
+            {loading ? (
+              <div className="p-12 text-center text-slate-400 flex flex-col items-center justify-center space-y-3">
+                <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+                <span className="text-xs">Loading registered users from MongoDB Atlas...</span>
+              </div>
+            ) : filteredUsers.length > 0 ? (
+              <table className="w-full text-left text-sm text-slate-300">
+                <thead className="bg-slate-950 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-800">
+                  <tr>
+                    <th className="py-4 px-6 font-bold">Name</th>
+                    <th className="py-4 px-6 font-bold">Email</th>
+                    <th className="py-4 px-6 font-bold">Role</th>
+                    <th className="py-4 px-6 font-bold">Status</th>
+                    <th className="py-4 px-6 font-bold text-right">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {filteredUsers.map((user) => (
+                    <tr
+                      key={user.id || user._id}
+                      className="hover:bg-slate-800/40 transition duration-150"
+                    >
+                      <td className="py-4 px-6 font-semibold text-white flex items-center space-x-3">
+                        <div className="w-8 h-8 rounded-lg bg-slate-800 text-purple-300 border border-purple-500/20 flex items-center justify-center font-bold text-xs">
+                          {user.name ? user.name[0].toUpperCase() : 'U'}
+                        </div>
+                        <span>{user.name}</span>
+                      </td>
+                      <td className="py-4 px-6 font-mono text-xs text-slate-300">{user.email}</td>
+                      <td className="py-4 px-6">
+                        <span
+                          className={`inline-flex px-2.5 py-0.5 rounded text-[11px] font-bold ${
+                            user.role === 'ADMIN'
+                              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                              : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                          }`}
+                        >
+                          {user.role}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className="inline-flex items-center space-x-1.5 text-xs text-emerald-400 font-medium">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                          <span>{user.status || 'Active'}</span>
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <div className="inline-flex items-center space-x-2">
+                          <button
+                            onClick={() => setSelectedUser(user)}
+                            className="px-3 py-1.5 bg-slate-800 hover:bg-purple-600 hover:text-white text-slate-300 rounded-lg text-xs font-semibold transition cursor-pointer"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(user.id || user._id, user.name)}
+                            className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition cursor-pointer"
+                            title="Delete User"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="p-10 text-center text-slate-400 text-xs">
+                No users found matching query
+              </div>
+            )}
           </div>
         </div>
 
@@ -167,7 +208,7 @@ const AdminUsers = () => {
                 </h3>
                 <button
                   onClick={() => setSelectedUser(null)}
-                  className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                  className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -188,8 +229,8 @@ const AdminUsers = () => {
                     <span className="font-bold text-purple-300">{selectedUser.role}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block mb-1">Rooms Joined</span>
-                    <span className="font-bold text-white">{selectedUser.roomsCount || 2}</span>
+                    <span className="text-slate-400 block mb-1">Joined Date</span>
+                    <span className="font-bold text-white">{selectedUser.joinedDate || 'Recent'}</span>
                   </div>
                 </div>
               </div>
@@ -197,7 +238,7 @@ const AdminUsers = () => {
               <div className="mt-5 pt-3 border-t border-slate-800 flex justify-end">
                 <button
                   onClick={() => setSelectedUser(null)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs transition"
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs transition cursor-pointer"
                 >
                   Close
                 </button>

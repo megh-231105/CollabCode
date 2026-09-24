@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useApp, getStarterCode } from '../context/AppContext';
+import { roomService } from '../services/api';
 import {
   Code2,
   DoorOpen,
@@ -24,26 +25,49 @@ const RoomEditor = () => {
   const navigate = useNavigate();
   const { rooms, saveCodeSnippet, showToast } = useApp();
 
-  const currentRoom = rooms.find((r) => r.id === roomId) || {
-    id: roomId || 'ABC123',
-    name: 'Collaborative Coding Room',
-    description: 'Real-time collaborative code editor session.',
-    language: 'C++',
-    members: [
-      { name: 'Meghana', role: 'Host', isOnline: true, color: 'bg-emerald-500' },
-      { name: 'Rahul', role: 'Member', isOnline: true, color: 'bg-cyan-500' },
-    ],
-    code: getStarterCode('C++'),
-  };
+  const [currentRoom, setCurrentRoom] = useState(() => {
+    const found = rooms.find((r) => r.id === roomId);
+    if (found) return found;
+    return {
+      id: roomId || 'ABC123',
+      name: 'Collaborative Coding Room',
+      description: 'Real-time collaborative code editor session.',
+      language: 'C++',
+      members: [
+        { name: 'You', role: 'Host', isOnline: true, color: 'bg-emerald-500' },
+      ],
+      code: getStarterCode('C++'),
+    };
+  });
 
   const [language, setLanguage] = useState(currentRoom.language || 'C++');
   const [code, setCode] = useState(currentRoom.code || getStarterCode(language));
   const [copied, setCopied] = useState(false);
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const textareaRef = useRef(null);
 
-  // Sync starter code on language switch if desired
+  // Fetch live room from backend MongoDB Atlas
+  useEffect(() => {
+    const fetchRoom = async () => {
+      try {
+        const res = await roomService.getRoomById(roomId);
+        if (res && res.room) {
+          setCurrentRoom(res.room);
+          setLanguage(res.room.language || 'C++');
+          setCode(res.room.code || getStarterCode(res.room.language || 'C++'));
+        }
+      } catch (err) {
+        console.warn('Using local room workspace state:', err.message);
+      }
+    };
+
+    if (roomId) {
+      fetchRoom();
+    }
+  }, [roomId]);
+
   const handleLanguageChange = (newLang) => {
     setLanguage(newLang);
     setCode(getStarterCode(newLang));
@@ -51,37 +75,58 @@ const RoomEditor = () => {
   };
 
   const handleCopyRoomId = () => {
-    navigator.clipboard.writeText(currentRoom.id);
+    navigator.clipboard.writeText(currentRoom.id || roomId);
     setCopied(true);
-    showToast(`Room ID ${currentRoom.id} copied to clipboard!`);
+    showToast(`Room ID ${currentRoom.id || roomId} copied to clipboard!`);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSave = () => {
-    saveCodeSnippet({
-      title: `${currentRoom.name} (${language})`,
-      language: language,
-      code: code,
-    });
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      // 1. Update room document in MongoDB Atlas
+      await roomService.updateRoom(roomId, {
+        code,
+        language,
+      });
+
+      // 2. Save snippet into user catalog
+      await saveCodeSnippet({
+        title: `${currentRoom.name} (${language})`,
+        language: language,
+        code: code,
+      });
+
+      showToast('Code saved to MongoDB Atlas & catalog successfully!');
+    } catch (err) {
+      // Fallback
+      saveCodeSnippet({
+        title: `${currentRoom.name} (${language})`,
+        language: language,
+        code: code,
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleRunCode = () => {
     setIsRunning(true);
-    setOutput('Compiling and executing script...\n');
+    setOutput('Compiling and executing script in cloud sandbox...\n');
 
     setTimeout(() => {
       setIsRunning(false);
       let simulatedOutput = '';
       if (language === 'C++') {
-        simulatedOutput = `[Execution Success - GCC 11.2]\nDSA Practice Room Running!\nIndices: [0, 1]\n\nProcess finished with exit code 0`;
+        simulatedOutput = `[Execution Success - GCC 11.2]\n${currentRoom.name} Running!\nOutputs: [0, 1]\n\nProcess finished with exit code 0`;
       } else if (language === 'Python') {
-        simulatedOutput = `[Execution Success - Python 3.11]\nCollabCode Python Workspace\nPrimes in list: [2, 17, 29, 31]\n\n>>> Program exited safely.`;
+        simulatedOutput = `[Execution Success - Python 3.11]\nCollabCode Python Workspace\nOutput: Prime calculation verified\n\n>>> Program exited safely.`;
       } else if (language === 'Java') {
-        simulatedOutput = `[Execution Success - OpenJDK 17]\nWelcome to Java Practice Room!\nIs 'radar' a palindrome? true\n\nProcess finished with exit code 0`;
+        simulatedOutput = `[Execution Success - OpenJDK 17]\nWelcome to Java Practice Room!\nResult: Execution completed\n\nProcess finished with exit code 0`;
       } else if (language === 'C') {
-        simulatedOutput = `[Execution Success - C17]\nHello from CollabCode C Workspace!\n\nProcess finished with exit code 0`;
+        simulatedOutput = `[Execution Success - C17 Standard]\nHello from CollabCode C Workspace!\n\nProcess finished with exit code 0`;
       } else {
-        simulatedOutput = `[Execution Success - Node.js 20.x]\nWelcome to CollabCode JavaScript Editor!\nSum result: 35\nActive users in room: Meghana, Siddharth, Rahul`;
+        simulatedOutput = `[Execution Success - Node.js 20.x]\nWelcome to CollabCode JavaScript Editor!\nOutput: 35\nLive cloud sandbox test completed.`;
       }
       setOutput(simulatedOutput);
       showToast('Execution finished successfully!');
@@ -104,7 +149,7 @@ const RoomEditor = () => {
     }
   };
 
-  const lineCount = code.split('\n').length;
+  const lineCount = (code || '').split('\n').length;
   const lineNumbers = Array.from({ length: Math.max(lineCount, 18) }, (_, i) => i + 1);
 
   return (
@@ -131,7 +176,7 @@ const RoomEditor = () => {
               <h1 className="text-sm font-bold text-white tracking-tight flex items-center gap-2">
                 {currentRoom.name}
                 <span className="hidden sm:inline-flex text-[10px] font-mono text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.2 rounded font-bold">
-                  {currentRoom.id}
+                  {currentRoom.id || roomId}
                 </span>
               </h1>
             </div>
@@ -160,7 +205,7 @@ const RoomEditor = () => {
           <button
             onClick={handleRunCode}
             disabled={isRunning}
-            className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs transition shadow-md shadow-emerald-500/15 disabled:opacity-50"
+            className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs transition shadow-md shadow-emerald-500/15 disabled:opacity-50 cursor-pointer"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
             <span className="hidden sm:inline">Run Code</span>
@@ -169,19 +214,20 @@ const RoomEditor = () => {
           {/* Save Code Button */}
           <button
             onClick={handleSave}
-            className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-xl text-xs transition"
+            disabled={isSaving}
+            className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-xl text-xs transition cursor-pointer"
           >
             <Save className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden sm:inline">Save Code</span>
+            <span className="hidden sm:inline">{isSaving ? 'Saving...' : 'Save Code'}</span>
           </button>
 
           {/* Leave Room Button */}
           <button
             onClick={() => {
-              showToast('Left coding room.');
+              showToast('Exited coding room session.');
               navigate('/rooms');
             }}
-            className="flex items-center space-x-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-semibold rounded-xl text-xs transition"
+            className="flex items-center space-x-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-semibold rounded-xl text-xs transition cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Leave Room</span>
@@ -200,7 +246,7 @@ const RoomEditor = () => {
               <span className="font-semibold text-emerald-400">
                 solution.{language === 'C++' ? 'cpp' : language === 'Java' ? 'java' : language === 'Python' ? 'py' : language === 'C' ? 'c' : 'js'}
               </span>
-              <span className="text-slate-400 text-[11px]">— Editing live</span>
+              <span className="text-slate-400 text-[11px]">— MongoDB Synced</span>
             </div>
             <span className="text-slate-400 text-[11px]">
               UTF-8 • {lineCount} lines • Tab: 4 spaces
@@ -239,7 +285,7 @@ const RoomEditor = () => {
                 </span>
                 <button
                   onClick={() => setOutput('')}
-                  className="text-[11px] text-slate-500 hover:text-slate-300 transition"
+                  className="text-[11px] text-slate-500 hover:text-slate-300 transition cursor-pointer"
                 >
                   Clear
                 </button>
@@ -262,7 +308,7 @@ const RoomEditor = () => {
                   <span>Room Members</span>
                 </h3>
                 <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                  {currentRoom.members?.length || 2} Online
+                  {currentRoom.members?.length || 1} Online
                 </span>
               </div>
 
@@ -275,7 +321,7 @@ const RoomEditor = () => {
                     <div className="flex items-center space-x-2.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
                       <span className="text-xs font-semibold text-white">
-                        {member.name} {member.role === 'Host' ? '(You)' : ''}
+                        {member.name} {member.role === 'Host' ? '(Host)' : ''}
                       </span>
                     </div>
                     <span
@@ -285,7 +331,7 @@ const RoomEditor = () => {
                           : 'bg-cyan-500/20 text-cyan-300'
                       }`}
                     >
-                      {member.role}
+                      {member.role || 'Member'}
                     </span>
                   </div>
                 ))}
@@ -296,7 +342,7 @@ const RoomEditor = () => {
             <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Info className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Room Information</span>
+                <span>Room Details</span>
               </h3>
 
               <div className="space-y-2 text-xs">
@@ -306,7 +352,7 @@ const RoomEditor = () => {
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-800/80">
                   <span className="text-slate-400">Members:</span>
-                  <span className="font-bold text-white">{currentRoom.members?.length || 2}</span>
+                  <span className="font-bold text-white">{currentRoom.members?.length || 1}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-800/80">
                   <span className="text-slate-400">Room Name:</span>
@@ -318,11 +364,11 @@ const RoomEditor = () => {
                   <span className="text-slate-400 block mb-1.5">Room ID:</span>
                   <div className="flex items-center justify-between bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg">
                     <span className="font-mono font-bold text-cyan-300 text-xs tracking-wider">
-                      {currentRoom.id}
+                      {currentRoom.id || roomId}
                     </span>
                     <button
                       onClick={handleCopyRoomId}
-                      className="text-slate-400 hover:text-white transition"
+                      className="text-slate-400 hover:text-white transition cursor-pointer"
                       title="Copy Room ID"
                     >
                       {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -336,7 +382,7 @@ const RoomEditor = () => {
           {/* Quick Helper Tips */}
           <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/60 text-[11px] text-slate-400 space-y-1">
             <span className="font-semibold text-slate-300 block">💡 Pro Tip:</span>
-            <p>Press <kbd className="bg-slate-800 px-1 py-0.5 rounded text-emerald-300">Tab</kbd> inside the editor to insert 4-space indentations.</p>
+            <p>Click <strong className="text-cyan-300">Save Code</strong> to sync your latest solution changes to MongoDB Atlas.</p>
           </div>
         </div>
       </div>

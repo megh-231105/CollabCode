@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import { roomService } from '../../services/api';
 import { X, LogIn, KeyRound, AlertCircle } from 'lucide-react';
 
 const JoinRoomModal = () => {
-  const { isJoinModalOpen, setIsJoinModalOpen, rooms, showToast } = useApp();
+  const { isJoinModalOpen, setIsJoinModalOpen, rooms, showToast, refreshData } = useApp();
   const [roomId, setRoomId] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   if (!isJoinModalOpen) return null;
 
-  const handleJoin = (e) => {
+  const handleJoin = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -21,20 +23,19 @@ const JoinRoomModal = () => {
       return;
     }
 
-    const existingRoom = rooms.find(
-      (r) => r.id.toUpperCase() === trimmedId
-    );
-
-    setIsJoinModalOpen(false);
-    setRoomId('');
-
-    if (existingRoom) {
-      showToast(`Joined room "${existingRoom.name}"!`);
-      navigate(`/rooms/${existingRoom.id}`);
-    } else {
-      // If room not in default list, create/open mock room workspace with this ID
+    setLoading(true);
+    try {
+      // Call backend join endpoint
+      await roomService.joinRoom(trimmedId).catch(() => null);
+      await refreshData();
+      setIsJoinModalOpen(false);
+      setRoomId('');
       showToast(`Entering workspace for Room ID: ${trimmedId}`);
       navigate(`/rooms/${trimmedId}`);
+    } catch (err) {
+      setError(err.message || 'Error joining room');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,12 +50,12 @@ const JoinRoomModal = () => {
             </div>
             <div>
               <h3 className="text-xl font-bold text-white tracking-tight">Join Coding Room</h3>
-              <p className="text-xs text-slate-400">Collaborate with peers in real time</p>
+              <p className="text-xs text-slate-400">Collaborate with peers in real time on MongoDB Atlas</p>
             </div>
           </div>
           <button
             onClick={() => setIsJoinModalOpen(false)}
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
+            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -94,36 +95,39 @@ const JoinRoomModal = () => {
             </p>
           </div>
 
-          <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-xs text-slate-400">
-            <span className="text-slate-200 font-semibold block mb-1">Available demo room IDs:</span>
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {rooms.map((r) => (
-                <button
-                  type="button"
-                  key={r.id}
-                  onClick={() => setRoomId(r.id)}
-                  className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded font-mono text-[11px] transition"
-                >
-                  {r.id}
-                </button>
-              ))}
+          {rooms.length > 0 && (
+            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-xs text-slate-400">
+              <span className="text-slate-200 font-semibold block mb-1">Available active room IDs:</span>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {rooms.map((r) => (
+                  <button
+                    type="button"
+                    key={r.id || r._id}
+                    onClick={() => setRoomId(r.id)}
+                    className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded font-mono text-[11px] transition cursor-pointer"
+                  >
+                    {r.id}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-800">
             <button
               type="button"
               onClick={() => setIsJoinModalOpen(false)}
-              className="px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition"
+              className="px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 text-sm font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-xl transition shadow-lg shadow-cyan-500/20"
+              disabled={loading}
+              className="px-6 py-2.5 text-sm font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-xl transition shadow-lg shadow-cyan-500/20 cursor-pointer disabled:opacity-50"
             >
-              Join Room
+              {loading ? 'Joining...' : 'Join Room'}
             </button>
           </div>
         </form>

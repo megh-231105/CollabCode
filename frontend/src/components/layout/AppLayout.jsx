@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import CreateRoomModal from '../modals/CreateRoomModal';
 import JoinRoomModal from '../modals/JoinRoomModal';
 import {
@@ -18,7 +19,10 @@ import {
   Shield,
   Bell,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  Sparkles,
+  Terminal,
+  ExternalLink
 } from 'lucide-react';
 
 const AppLayout = ({ children }) => {
@@ -29,12 +33,14 @@ const AppLayout = ({ children }) => {
     notification,
     showToast
   } = useApp();
+  const { logout } = useAuth();
 
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    showToast('Logged out of demo session.');
+    logout();
+    showToast('Logged out of session.');
     navigate('/login');
   };
 
@@ -46,12 +52,17 @@ const AppLayout = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
-      {/* Toast Notification */}
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row font-sans selection:bg-emerald-500 selection:text-slate-950">
+      {/* Toast Notification Container */}
       {notification && (
-        <div className="fixed top-5 right-5 z-50 flex items-center space-x-3 bg-slate-900 border border-emerald-500/40 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl backdrop-blur animate-bounce-short">
-          <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-          <span className="text-sm font-medium">{notification.message}</span>
+        <div className="fixed top-6 right-6 z-50 flex items-center space-x-3 bg-slate-900/95 border border-emerald-500/40 text-slate-100 px-4 py-3.5 rounded-2xl shadow-2xl backdrop-blur-xl animate-bounce-short">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+            <CheckCircle2 className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-white">System Notification</p>
+            <p className="text-xs text-slate-300">{notification.message}</p>
+          </div>
         </div>
       )}
 
@@ -59,96 +70,98 @@ const AppLayout = ({ children }) => {
       <CreateRoomModal />
       <JoinRoomModal />
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 bg-slate-900/90 border-r border-slate-800/80 p-5 shrink-0 select-none">
-        {/* Brand */}
-        <Link to="/dashboard" className="flex items-center space-x-3 mb-8 px-2 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
-            <Code2 className="w-6 h-6 text-slate-950 font-black stroke-[2.5]" />
-          </div>
-          <div>
-            <span className="text-xl font-black tracking-tight text-white flex items-center">
-              Collab<span className="text-emerald-400">Code</span>
-            </span>
-            <span className="block text-[10px] uppercase font-bold tracking-wider text-slate-400">
-              Workspace
-            </span>
-          </div>
-        </Link>
+      {/* Desktop Sidebar (Google Stitch & Shards Architecture) */}
+      <aside className="hidden md:flex flex-col w-64 bg-slate-900/70 border-r border-slate-800/80 p-5 shrink-0 select-none backdrop-blur-xl justify-between">
+        <div>
+          {/* Brand */}
+          <Link to="/dashboard" className="flex items-center space-x-3 mb-8 px-2 group">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+              <Code2 className="w-5 h-5 text-slate-950 font-black stroke-[2.5]" />
+            </div>
+            <div>
+              <span className="text-xl font-black tracking-tight text-white flex items-center">
+                Collab<span className="text-emerald-400">Code</span>
+              </span>
+              <span className="block text-[10px] uppercase font-mono tracking-widest text-slate-400 font-semibold">
+                Workspace
+              </span>
+            </div>
+          </Link>
 
-        {/* Action Buttons in Sidebar */}
-        <div className="space-y-2 mb-6">
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="w-full flex items-center justify-center space-x-2 py-2.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-500/15"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Create Room</span>
-          </button>
-          <button
-            onClick={() => setIsJoinModalOpen(true)}
-            className="w-full flex items-center justify-center space-x-2 py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 font-semibold rounded-xl text-sm transition"
-          >
-            <LogIn className="w-4 h-4" />
-            <span>Join Room</span>
-          </button>
+          {/* Action Buttons in Sidebar */}
+          <div className="space-y-2 mb-6">
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="uiverse-btn-glow w-full flex items-center justify-center space-x-2 py-2.5 px-4 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black rounded-xl text-xs transition shadow-md shadow-emerald-500/15 cursor-pointer"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Create Room</span>
+            </button>
+            <button
+              onClick={() => setIsJoinModalOpen(true)}
+              className="w-full flex items-center justify-center space-x-2 py-2 px-4 bg-slate-800/90 hover:bg-slate-800 text-cyan-300 border border-slate-700/80 hover:border-cyan-500/40 font-bold rounded-xl text-xs transition cursor-pointer"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Join Room</span>
+            </button>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="space-y-1.5">
+            <p className="px-3 text-[10px] font-bold uppercase font-mono tracking-wider text-slate-400 mb-2">
+              Developer Navigation
+            </p>
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                      isActive
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 shadow-sm'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                    }`
+                  }
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.name}</span>
+                </NavLink>
+              );
+            })}
+
+            <div className="my-5 border-t border-slate-800/80"></div>
+
+            <p className="px-3 text-[10px] font-bold uppercase font-mono tracking-wider text-slate-400 mb-2">
+              System Admin
+            </p>
+            <Link
+              to="/admin"
+              className="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 border border-transparent hover:border-purple-500/20 transition"
+            >
+              <Shield className="w-4 h-4 text-purple-400" />
+              <span>Admin Portal</span>
+            </Link>
+          </nav>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="space-y-1.5 flex-1">
-          <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-            Main Navigation
-          </p>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition ${
-                    isActive
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-                  }`
-                }
-              >
-                <Icon className="w-4 h-4" />
-                <span>{item.name}</span>
-              </NavLink>
-            );
-          })}
-
-          <div className="my-5 border-t border-slate-800"></div>
-
-          <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-            System & Role
-          </p>
-          <Link
-            to="/admin"
-            className="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 border border-transparent hover:border-purple-500/20 transition"
-          >
-            <Shield className="w-4 h-4 text-purple-400" />
-            <span>Admin Portal</span>
-          </Link>
-        </nav>
-
-        {/* User Card & Logout */}
-        <div className="pt-4 border-t border-slate-800">
-          <div className="flex items-center justify-between p-2 rounded-xl bg-slate-950/60 border border-slate-800">
+        {/* User Card & Logout (Dynamic Real Data) */}
+        <div className="pt-4 border-t border-slate-800/80">
+          <div className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-950/80 border border-slate-800/90">
             <div className="flex items-center space-x-2.5 overflow-hidden">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs border border-emerald-500/30">
-                {currentUser.avatar}
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs border border-emerald-500/30 shrink-0">
+                {currentUser?.avatar || (currentUser?.name ? currentUser.name[0].toUpperCase() : 'U')}
               </div>
               <div className="truncate">
-                <p className="text-xs font-bold text-white truncate">{currentUser.name}</p>
-                <p className="text-[10px] text-slate-400 truncate">{currentUser.email}</p>
+                <p className="text-xs font-bold text-white truncate">{currentUser?.name || 'Developer'}</p>
+                <p className="text-[10px] text-slate-400 truncate">{currentUser?.email}</p>
               </div>
             </div>
             <button
               onClick={handleLogout}
               title="Logout"
-              className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition"
+              className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -157,9 +170,9 @@ const AppLayout = ({ children }) => {
       </aside>
 
       {/* Mobile Top Navbar */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-slate-900 border-b border-slate-800 sticky top-0 z-30">
+      <div className="md:hidden flex items-center justify-between p-4 bg-slate-900/95 border-b border-slate-800 sticky top-0 z-30 backdrop-blur-xl">
         <Link to="/dashboard" className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-slate-950 font-bold">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-950 font-bold">
             <Code2 className="w-5 h-5" />
           </div>
           <span className="text-lg font-black tracking-tight text-white">
@@ -169,26 +182,27 @@ const AppLayout = ({ children }) => {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="p-2 bg-emerald-500 text-slate-950 rounded-lg"
+            className="p-2 bg-emerald-400 text-slate-950 rounded-xl"
+            title="Create Room"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4 stroke-[2.5]" />
           </button>
           <button
             onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+            className="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-800 border border-slate-700"
           >
-            {mobileSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Drawer */}
       {mobileSidebarOpen && (
-        <div className="md:hidden fixed inset-0 z-40 bg-slate-950/90 backdrop-blur-sm flex">
+        <div className="md:hidden fixed inset-0 z-40 bg-slate-950/90 backdrop-blur-md flex">
           <div className="w-64 bg-slate-900 border-r border-slate-800 p-5 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
-                <span className="font-bold text-white">Menu Navigation</span>
+                <span className="font-bold text-white text-sm">Navigation</span>
                 <button
                   onClick={() => setMobileSidebarOpen(false)}
                   className="p-1 text-slate-400"
@@ -206,7 +220,7 @@ const AppLayout = ({ children }) => {
                       to={item.path}
                       onClick={() => setMobileSidebarOpen(false)}
                       className={({ isActive }) =>
-                        `flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold ${
+                        `flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold ${
                           isActive
                             ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                             : 'text-slate-400 hover:text-white'
@@ -221,7 +235,7 @@ const AppLayout = ({ children }) => {
                 <Link
                   to="/admin"
                   onClick={() => setMobileSidebarOpen(false)}
-                  className="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-purple-400"
+                  className="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-purple-400"
                 >
                   <Shield className="w-4 h-4" />
                   <span>Admin Portal</span>
@@ -231,7 +245,7 @@ const AppLayout = ({ children }) => {
 
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center space-x-2 py-2.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 font-semibold rounded-xl text-sm"
+              className="w-full flex items-center justify-center space-x-2 py-2.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold rounded-xl text-xs"
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>

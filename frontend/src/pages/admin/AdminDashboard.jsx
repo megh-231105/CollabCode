@@ -12,7 +12,8 @@ import {
   ShieldCheck,
   Server,
   Cpu,
-  Clock
+  Clock,
+  Database
 } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -82,13 +83,13 @@ const AdminDashboard = () => {
 
   return (
     <AdminLayout>
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-7xl mx-auto space-y-8 font-sans">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
           <div>
-            <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-semibold mb-2">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-bold mb-2">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>MongoDB Atlas Admin Dashboard</span>
+              <span>MongoDB Atlas Admin Console</span>
             </div>
             <h1 className="text-3xl font-black text-white tracking-tight">
               Admin Overview Dashboard
@@ -107,14 +108,14 @@ const AdminDashboard = () => {
             </Link>
             <Link
               to="/admin/rooms"
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-xl text-xs transition cursor-pointer"
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold rounded-xl text-xs transition cursor-pointer"
             >
               View Rooms
             </Link>
           </div>
         </div>
 
-        {/* Statistics Metric Cards */}
+        {/* Statistics Metric Cards (Shards Style) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, idx) => {
             const Icon = stat.icon;
@@ -122,10 +123,10 @@ const AdminDashboard = () => {
               <Link
                 key={idx}
                 to={stat.link}
-                className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 transition hover:-translate-y-1 block shadow-lg group"
+                className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800/90 hover:border-slate-700 transition hover:-translate-y-1 block shadow-xl group backdrop-blur-xl"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-bold uppercase font-mono tracking-wider text-slate-400">
                     {stat.title}
                   </span>
                   <div
@@ -150,13 +151,13 @@ const AdminDashboard = () => {
         {/* Lower Grid: Recent Users & System Status */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Platform Activity */}
-          <div className="lg:col-span-2 bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
+          <div className="lg:col-span-2 bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 backdrop-blur-xl">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 <Activity className="w-4 h-4 text-purple-400" />
                 <span>Recent Database Registrations</span>
               </h2>
-              <span className="text-xs text-slate-400">MongoDB Live</span>
+              <span className="text-xs text-slate-400 font-mono">MongoDB Live</span>
             </div>
 
             <div className="space-y-3">
@@ -175,7 +176,7 @@ const AdminDashboard = () => {
                           <span className="text-purple-400 font-semibold">{u.name}</span>{' '}
                           registered account ({u.role})
                         </p>
-                        <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
+                        <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5 font-mono">
                           <Clock className="w-3 h-3" />
                           {u.email}
                         </p>
@@ -195,7 +196,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* Infrastructure Health Card */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
+          <div className="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between backdrop-blur-xl">
             <div>
               <h2 className="text-base font-bold text-white flex items-center gap-2 mb-4">
                 <Server className="w-4 h-4 text-emerald-400" />
@@ -225,7 +226,7 @@ const AdminDashboard = () => {
             <div className="mt-6 pt-4 border-t border-slate-800 text-center">
               <Link
                 to="/dashboard"
-                className="text-xs text-purple-400 hover:text-purple-300 font-semibold flex items-center justify-center gap-1 cursor-pointer"
+                className="text-xs text-purple-400 hover:text-purple-300 font-bold flex items-center justify-center gap-1 cursor-pointer"
               >
                 <span>Switch to Student Workspace</span>
                 <ArrowRight className="w-3.5 h-3.5" />

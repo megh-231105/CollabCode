@@ -4,6 +4,88 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-white;
+    @apply bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-slate-950;
   }
+}
+
+/* Custom Sleek Scrollbar for Code Editors and Panels */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* UIverse & Cyber Developer Button Utilities */
+.uiverse-btn-glow {
+  position: relative;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.uiverse-btn-glow::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.uiverse-btn-glow:hover::before {
+  opacity: 1;
+}
+
+/* UIverse Input Glow on Focus */
+.uiverse-input {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.uiverse-input:focus {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2), 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+/* Shimmer gradient text effect for React Bits */
+.react-bits-shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #34d399 25%,
+    #38bdf8 50%,
+    #34d399 75%,
+    #ffffff 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+/* Glassmorphism Card Style */
+.glass-card {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+}
+
+.glass-card:hover {
+  border-color: rgba(52, 211, 153, 0.3);
+  box-shadow: 0 12px 30px -10px rgba(16, 185, 129, 0.1);
 }

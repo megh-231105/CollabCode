@@ -13,7 +13,9 @@ import {
   X,
   UserCheck,
   Mail,
-  Loader2
+  Loader2,
+  Calendar,
+  Layers
 } from 'lucide-react';
 
 const AdminUsers = () => {
@@ -50,7 +52,7 @@ const AdminUsers = () => {
   });
 
   const handleDeleteUser = async (userId, userName) => {
-    if (!window.confirm(`Are you sure you want to remove user "${userName}" from MongoDB?`)) {
+    if (!window.confirm(`Are you sure you want to remove user "${userName}" from MongoDB Atlas?`)) {
       return;
     }
 
@@ -66,19 +68,20 @@ const AdminUsers = () => {
 
   return (
     <AdminLayout>
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6 font-sans">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
           <div>
-            <h1 className="text-3xl font-black text-white tracking-tight">
-              Users Management
+            <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
+              <Users className="w-7 h-7 text-purple-400" />
+              <span>User Directory</span>
             </h1>
             <p className="mt-1 text-sm text-slate-400">
-              Inspect user roles, monitor account status, and manage registration directory from MongoDB Atlas.
+              Inspect user roles, monitor account status, and manage registration directory in MongoDB Atlas.
             </p>
           </div>
-          <div className="text-xs text-slate-400 bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl">
-            Total Registered Users: <span className="text-purple-400 font-bold">{usersList.length}</span>
+          <div className="text-xs font-mono font-bold text-slate-300 bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl">
+            Total Registered: <span className="text-purple-400">{usersList.length}</span>
           </div>
         </div>
 
@@ -94,20 +97,20 @@ const AdminUsers = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search users by name or email..."
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition text-sm"
+              className="uiverse-input w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition text-sm font-medium"
             />
           </div>
 
           {/* Role Filter */}
           <div className="flex items-center space-x-1.5">
-            <span className="text-xs text-slate-400 font-semibold mr-1 flex items-center gap-1">
+            <span className="text-xs text-slate-400 font-bold font-mono mr-1 flex items-center gap-1">
               <Filter className="w-3 h-3" /> Role:
             </span>
             {['ALL', 'USER', 'ADMIN'].map((role) => (
               <button
                 key={role}
                 onClick={() => setRoleFilter(role)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition cursor-pointer ${
                   roleFilter === role
                     ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
                     : 'bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800'
@@ -119,41 +122,41 @@ const AdminUsers = () => {
           </div>
         </div>
 
-        {/* Users Table */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+        {/* Users Table (Shards React Style) */}
+        <div className="bg-slate-900/80 border border-slate-800/90 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-xl">
           <div className="overflow-x-auto">
             {loading ? (
               <div className="p-12 text-center text-slate-400 flex flex-col items-center justify-center space-y-3">
                 <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
-                <span className="text-xs">Loading registered users from MongoDB Atlas...</span>
+                <span className="text-xs font-medium">Loading registered users from MongoDB Atlas...</span>
               </div>
             ) : filteredUsers.length > 0 ? (
               <table className="w-full text-left text-sm text-slate-300">
-                <thead className="bg-slate-950 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-800">
+                <thead className="bg-slate-950 text-xs font-mono uppercase tracking-wider text-slate-400 border-b border-slate-800">
                   <tr>
-                    <th className="py-4 px-6 font-bold">Name</th>
+                    <th className="py-4 px-6 font-bold">User</th>
                     <th className="py-4 px-6 font-bold">Email</th>
                     <th className="py-4 px-6 font-bold">Role</th>
                     <th className="py-4 px-6 font-bold">Status</th>
                     <th className="py-4 px-6 font-bold text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-slate-800/60 font-sans">
                   {filteredUsers.map((user) => (
                     <tr
                       key={user.id || user._id}
                       className="hover:bg-slate-800/40 transition duration-150"
                     >
-                      <td className="py-4 px-6 font-semibold text-white flex items-center space-x-3">
-                        <div className="w-8 h-8 rounded-lg bg-slate-800 text-purple-300 border border-purple-500/20 flex items-center justify-center font-bold text-xs">
+                      <td className="py-4 px-6 font-bold text-white flex items-center space-x-3">
+                        <div className="w-8 h-8 rounded-xl bg-slate-800 text-purple-300 border border-purple-500/20 flex items-center justify-center font-bold text-xs shrink-0">
                           {user.name ? user.name[0].toUpperCase() : 'U'}
                         </div>
-                        <span>{user.name}</span>
+                        <span className="truncate">{user.name}</span>
                       </td>
                       <td className="py-4 px-6 font-mono text-xs text-slate-300">{user.email}</td>
                       <td className="py-4 px-6">
                         <span
-                          className={`inline-flex px-2.5 py-0.5 rounded text-[11px] font-bold ${
+                          className={`inline-flex px-2.5 py-0.5 rounded-md text-[11px] font-bold font-mono ${
                             user.role === 'ADMIN'
                               ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
                               : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
@@ -164,7 +167,7 @@ const AdminUsers = () => {
                       </td>
                       <td className="py-4 px-6">
                         <span className="inline-flex items-center space-x-1.5 text-xs text-emerald-400 font-medium">
-                          <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                           <span>{user.status || 'Active'}</span>
                         </span>
                       </td>
@@ -174,7 +177,7 @@ const AdminUsers = () => {
                             onClick={() => setSelectedUser(user)}
                             className="px-3 py-1.5 bg-slate-800 hover:bg-purple-600 hover:text-white text-slate-300 rounded-lg text-xs font-semibold transition cursor-pointer"
                           >
-                            View
+                            Inspect
                           </button>
                           <button
                             onClick={() => handleDeleteUser(user.id || user._id, user.name)}
@@ -199,8 +202,8 @@ const AdminUsers = () => {
 
         {/* User Details Modal */}
         {selectedUser && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-            <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+            <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl p-6 backdrop-blur-xl">
               <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <UserCheck className="w-4 h-4 text-purple-400" />
@@ -208,28 +211,28 @@ const AdminUsers = () => {
                 </h3>
                 <button
                   onClick={() => setSelectedUser(null)}
-                  className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer"
+                  className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="space-y-3 text-xs">
-                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                  <span className="text-slate-400 block mb-1">Full Name</span>
+                <div className="p-3.5 bg-slate-950/90 rounded-2xl border border-slate-800">
+                  <span className="text-slate-400 block mb-1 font-mono uppercase text-[10px]">Full Name</span>
                   <span className="text-sm font-bold text-white">{selectedUser.name}</span>
                 </div>
-                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                  <span className="text-slate-400 block mb-1">Email Address</span>
-                  <span className="text-sm font-medium text-slate-200">{selectedUser.email}</span>
+                <div className="p-3.5 bg-slate-950/90 rounded-2xl border border-slate-800">
+                  <span className="text-slate-400 block mb-1 font-mono uppercase text-[10px]">Email Address</span>
+                  <span className="text-sm font-medium text-slate-200 font-mono">{selectedUser.email}</span>
                 </div>
-                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex justify-between">
+                <div className="p-3.5 bg-slate-950/90 rounded-2xl border border-slate-800 flex justify-between">
                   <div>
-                    <span className="text-slate-400 block mb-1">Assigned Role</span>
-                    <span className="font-bold text-purple-300">{selectedUser.role}</span>
+                    <span className="text-slate-400 block mb-1 font-mono uppercase text-[10px]">Assigned Role</span>
+                    <span className="font-bold text-purple-300 font-mono">{selectedUser.role}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block mb-1">Joined Date</span>
+                    <span className="text-slate-400 block mb-1 font-mono uppercase text-[10px]">Joined Date</span>
                     <span className="font-bold text-white">{selectedUser.joinedDate || 'Recent'}</span>
                   </div>
                 </div>
@@ -238,7 +241,7 @@ const AdminUsers = () => {
               <div className="mt-5 pt-3 border-t border-slate-800 flex justify-end">
                 <button
                   onClick={() => setSelectedUser(null)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs transition cursor-pointer"
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition cursor-pointer"
                 >
                   Close
                 </button>

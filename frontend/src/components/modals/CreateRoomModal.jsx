@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { X, Code2, Sparkles, Layers } from 'lucide-react';
+import { X, Code2, Sparkles, Layers, ArrowRight } from 'lucide-react';
 
 const CreateRoomModal = () => {
   const { isCreateModalOpen, setIsCreateModalOpen, createRoom } = useApp();
@@ -34,22 +34,22 @@ const CreateRoomModal = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn font-sans">
+      <div className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-900/50">
+        <div className="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-900/60">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-white tracking-tight">Create New Room</h3>
+              <h3 className="text-lg font-bold text-white tracking-tight">Create Coding Room</h3>
               <p className="text-xs text-slate-400">Launch a collaborative workspace for your team in MongoDB Atlas</p>
             </div>
           </div>
           <button
             onClick={() => setIsCreateModalOpen(false)}
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer"
+            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -67,8 +67,8 @@ const CreateRoomModal = () => {
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="e.g. Dynamic Programming Blitz"
-              className="w-full px-4 py-2.5 bg-slate-950/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition text-sm"
+              placeholder="e.g. Dynamic Programming Practice"
+              className="uiverse-input w-full px-4 py-2.5 bg-slate-950/90 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition text-sm font-medium"
             />
           </div>
 
@@ -82,7 +82,7 @@ const CreateRoomModal = () => {
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="What are you building or practicing in this room?"
-              className="w-full px-4 py-2.5 bg-slate-950/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition text-sm resize-none"
+              className="uiverse-input w-full px-4 py-2.5 bg-slate-950/90 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition text-sm resize-none font-medium"
             ></textarea>
           </div>
 
@@ -95,15 +95,15 @@ const CreateRoomModal = () => {
               <select
                 value={formData.language}
                 onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-                className="w-full px-4 py-2.5 bg-slate-950/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition text-sm appearance-none cursor-pointer"
+                className="uiverse-input w-full px-4 py-2.5 bg-slate-950/90 border border-slate-700/80 rounded-xl text-white focus:outline-none focus:border-emerald-500 transition text-sm appearance-none cursor-pointer font-medium"
               >
-                <option value="C++">C++ (GCC 11)</option>
-                <option value="C">C (C17 Standard)</option>
-                <option value="Java">Java (OpenJDK 17)</option>
-                <option value="Python">Python (Python 3.11)</option>
-                <option value="JavaScript">JavaScript (Node.js 20)</option>
+                <option value="C++" className="bg-slate-900 text-white">C++ (GCC 11)</option>
+                <option value="C" className="bg-slate-900 text-white">C (C17 Standard)</option>
+                <option value="Java" className="bg-slate-900 text-white">Java (OpenJDK 17)</option>
+                <option value="Python" className="bg-slate-900 text-white">Python (Python 3.11)</option>
+                <option value="JavaScript" className="bg-slate-900 text-white">JavaScript (Node.js 20)</option>
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-400">
                 <Layers className="w-4 h-4" />
               </div>
             </div>
@@ -114,16 +114,16 @@ const CreateRoomModal = () => {
             <button
               type="button"
               onClick={() => setIsCreateModalOpen(false)}
-              className="px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
+              className="px-4 py-2.5 text-xs font-bold text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
+              className="uiverse-btn-glow px-6 py-2.5 text-xs font-black bg-emerald-400 hover:bg-emerald-300 text-slate-950 rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
             >
-              {loading ? 'Creating...' : 'Create Room'}
+              {loading ? 'Creating...' : 'Launch Room'}
             </button>
           </div>
         </form>

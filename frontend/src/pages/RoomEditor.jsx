@@ -251,8 +251,8 @@ const RoomEditor = () => {
         {/* Center/Right: Language, Run, Stdin Toggle, Save, Invite, Leave */}
         <div className="flex items-center space-x-2 sm:space-x-2.5">
           {/* Language Selector */}
-          <div className="flex items-center space-x-1.5 bg-slate-950 border border-slate-700 rounded-xl px-2 sm:px-2.5 py-1">
-            <span className="text-[11px] font-bold text-slate-400 hidden sm:inline">Lang:</span>
+          <div className="flex items-center space-x-1.5 bg-slate-950 border border-slate-700/80 rounded-xl px-2 sm:px-2.5 py-1">
+            <span className="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-400 hidden sm:inline">Lang:</span>
             <select
               value={language}
               onChange={(e) => handleLanguageChange(e.target.value)}
@@ -277,17 +277,17 @@ const RoomEditor = () => {
             title="Custom Standard Input (stdin) for input(), Scanner, cin"
           >
             <Keyboard className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Input (stdin)</span>
+            <span className="hidden md:inline font-semibold">Input (stdin)</span>
             {stdin.trim() && (
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
             )}
           </button>
 
-          {/* Run Code Button */}
+          {/* Run Code Button (UIverse glow) */}
           <button
             onClick={handleRunCode}
             disabled={isRunning}
-            className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs transition shadow-md shadow-emerald-500/15 disabled:opacity-50 cursor-pointer"
+            className="uiverse-btn-glow flex items-center space-x-1.5 px-4 py-1.5 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black rounded-xl text-xs transition shadow-md shadow-emerald-500/20 disabled:opacity-50 cursor-pointer"
           >
             {isRunning ? (
               <>
@@ -306,7 +306,7 @@ const RoomEditor = () => {
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-xl text-xs transition cursor-pointer"
+            className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold rounded-xl text-xs transition cursor-pointer"
           >
             <Save className="w-3.5 h-3.5 text-cyan-400" />
             <span>{isSaving ? 'Saving...' : 'Save'}</span>
@@ -318,7 +318,7 @@ const RoomEditor = () => {
               handleCopyInviteLink();
               setIsInviteModalOpen(true);
             }}
-            className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold rounded-xl text-xs transition cursor-pointer"
+            className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold rounded-xl text-xs transition cursor-pointer"
             title="Invite friend to collaborate on this room"
           >
             <Share2 className="w-3.5 h-3.5" />
@@ -331,7 +331,7 @@ const RoomEditor = () => {
               showToast('Exited coding room session.');
               navigate('/rooms');
             }}
-            className="flex items-center space-x-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-semibold rounded-xl text-xs transition cursor-pointer"
+            className="flex items-center space-x-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-bold rounded-xl text-xs transition cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Leave</span>

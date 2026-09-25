@@ -11,13 +11,12 @@ import {
   ArrowRight,
   Users,
   Clock,
-  Code2,
   Sparkles,
   ExternalLink,
-  Terminal,
   Server,
+  Activity,
   Zap,
-  Activity
+  CheckCircle2
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -46,7 +45,7 @@ const Dashboard = () => {
       value: rooms.length,
       change: 'Active collaborative sessions',
       icon: DoorOpen,
-      color: 'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-emerald-500/30',
+      color: 'from-emerald-500/20 to-lime-500/10 text-emerald-400 border-emerald-500/30',
       link: '/rooms',
     },
     {
@@ -54,16 +53,16 @@ const Dashboard = () => {
       value: savedCode.length,
       change: 'Cataloged in MongoDB Atlas',
       icon: Bookmark,
-      color: 'from-cyan-500/20 to-blue-500/10 text-cyan-400 border-cyan-500/30',
+      color: 'from-lime-500/20 to-emerald-500/10 text-lime-400 border-lime-500/30',
       link: '/saved-code',
     },
     {
       title: 'Supported Languages',
       value: '5',
-      sub: 'C++, Python, Java, C, JS',
+      sub: 'Python, C++, Java, C, JS',
       change: 'Multi-compiler sandbox',
       icon: Layers,
-      color: 'from-purple-500/20 to-indigo-500/10 text-purple-400 border-purple-500/30',
+      color: 'from-emerald-500/20 to-teal-500/10 text-emerald-300 border-emerald-500/30',
       link: '/rooms',
     },
     {
@@ -71,7 +70,7 @@ const Dashboard = () => {
       value: 'Live',
       change: 'MongoDB Atlas Cloud Engine',
       icon: Server,
-      color: 'from-amber-500/20 to-orange-500/10 text-amber-400 border-amber-500/30',
+      color: 'from-lime-400/20 to-emerald-400/10 text-lime-300 border-lime-400/30',
       link: '/profile',
     },
   ];
@@ -80,21 +79,22 @@ const Dashboard = () => {
     <AppLayout>
       <div className="p-6 md:p-10 max-w-7xl mx-auto w-full space-y-8 font-sans">
         {/* Welcome Header (Shards & Stitch Style) */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-800/80 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden backdrop-blur-xl">
+        <div className="bg-gradient-to-r from-charcoal-900 via-charcoal-900/95 to-charcoal-850 border border-charcoal-750 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden backdrop-blur-xl">
           {/* Ambient Glow */}
           <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+          <div className="absolute bottom-0 right-1/3 w-60 h-60 bg-lime-500/8 blur-[90px] rounded-full pointer-events-none"></div>
 
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-950/80 border border-slate-700 text-xs text-emerald-400 font-semibold mb-3 shadow-inner">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>MongoDB Atlas Real-Time Workspace</span>
+              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-charcoal-950/80 border border-charcoal-700 text-xs text-emerald-400 font-semibold mb-3 shadow-inner">
+                <Sparkles className="w-3.5 h-3.5 text-lime-400" />
+                <span>CodeCrew Collaborative Workspace</span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
                 {getGreeting()}, <span className="text-emerald-400">{realUserName}</span> 👋
               </h1>
               <p className="mt-1.5 text-slate-300 text-sm sm:text-base font-medium max-w-xl">
-                Ready to code? Launch a real-time multi-language room, collaborate with peers, or explore your saved algorithms.
+                Ready to code with your crew? Launch a shared multi-language room, collaborate with peers, or explore your saved algorithms.
               </p>
             </div>
 
@@ -102,14 +102,14 @@ const Dashboard = () => {
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="uiverse-btn-glow flex items-center space-x-2 px-5 py-3 bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:from-emerald-300 hover:to-teal-200 text-slate-950 font-black rounded-xl text-xs transition shadow-lg shadow-emerald-500/20 hover:scale-[1.02] cursor-pointer"
+                className="uiverse-btn-glow flex items-center space-x-2 px-5 py-3 bg-gradient-to-r from-emerald-400 via-lime-300 to-emerald-400 hover:from-emerald-300 hover:to-lime-200 text-charcoal-950 font-black rounded-xl text-xs transition shadow-lg shadow-emerald-500/20 hover:scale-[1.02] cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[2.5]" />
                 <span>+ Create Room</span>
               </button>
               <button
                 onClick={() => setIsJoinModalOpen(true)}
-                className="flex items-center space-x-2 px-5 py-3 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 hover:border-cyan-500/40 text-cyan-300 font-bold rounded-xl text-xs transition hover:scale-[1.02] cursor-pointer"
+                className="flex items-center space-x-2 px-5 py-3 bg-charcoal-800 hover:bg-charcoal-750 border border-charcoal-700 hover:border-emerald-500/40 text-emerald-300 font-bold rounded-xl text-xs transition hover:scale-[1.02] cursor-pointer"
               >
                 <LogIn className="w-4 h-4 stroke-[2.5]" />
                 <span>Join Room</span>
@@ -118,7 +118,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Statistics Metric Cards (Shards React Style) */}
+        {/* Statistics Metric Cards (Shards Style) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, idx) => {
             const Icon = stat.icon;
@@ -126,7 +126,7 @@ const Dashboard = () => {
               <Link
                 key={idx}
                 to={stat.link}
-                className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800/90 hover:border-slate-700 transition hover:-translate-y-1 shadow-xl block group backdrop-blur-xl"
+                className="p-6 rounded-2xl bg-charcoal-900/80 border border-charcoal-800 hover:border-charcoal-700 transition hover:-translate-y-1 shadow-xl block group backdrop-blur-xl"
               >
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-xs font-bold uppercase font-mono tracking-wider text-slate-400">
@@ -161,7 +161,7 @@ const Dashboard = () => {
             <div>
               <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
                 <DoorOpen className="w-5 h-5 text-emerald-400" />
-                <span>Recent Coding Rooms</span>
+                <span>Recent Crew Rooms</span>
               </h2>
               <p className="text-xs text-slate-400">
                 Jump back into your active coding rooms stored on MongoDB Atlas
@@ -169,7 +169,7 @@ const Dashboard = () => {
             </div>
             <Link
               to="/rooms"
-              className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition"
+              className="text-xs font-bold text-emerald-400 hover:text-lime-300 flex items-center gap-1 transition"
             >
               <span>View All Rooms</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -181,14 +181,14 @@ const Dashboard = () => {
               {rooms.slice(0, 3).map((room) => (
                 <div
                   key={room.id || room._id}
-                  className="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition hover:shadow-2xl group backdrop-blur-xl"
+                  className="bg-charcoal-900/80 border border-charcoal-800 rounded-2xl p-6 flex flex-col justify-between hover:border-charcoal-700 transition hover:shadow-2xl group backdrop-blur-xl"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <span className="px-2.5 py-1 rounded-md text-[11px] font-bold font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                        {room.language || 'C++'}
+                        {room.language || 'Python'}
                       </span>
-                      <span className="text-xs font-mono font-bold text-cyan-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                      <span className="text-xs font-mono font-bold text-lime-400 bg-charcoal-950 px-2 py-0.5 rounded border border-charcoal-800">
                         ID: {room.id}
                       </span>
                     </div>
@@ -197,15 +197,15 @@ const Dashboard = () => {
                       {room.name}
                     </h3>
                     <p className="text-xs text-slate-400 line-clamp-2 mb-4 leading-relaxed">
-                      {room.description || 'Collaborative coding workspace session.'}
+                      {room.description || 'Collaborative coding workspace session on CodeCrew.'}
                     </p>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-800/80 space-y-3">
+                  <div className="pt-4 border-t border-charcoal-800 space-y-3">
                     <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
                       <div className="flex items-center space-x-1.5">
-                        <Users className="w-3.5 h-3.5 text-cyan-400" />
-                        <span>{room.members ? room.members.length : 1} Members</span>
+                        <Users className="w-3.5 h-3.5 text-lime-400" />
+                        <span>{room.members ? room.members.length : 1} Crew Members</span>
                       </div>
                       <div className="flex items-center space-x-1.5">
                         <Clock className="w-3.5 h-3.5 text-slate-400" />
@@ -215,7 +215,7 @@ const Dashboard = () => {
 
                     <Link
                       to={`/rooms/${room.id}`}
-                      className="w-full flex items-center justify-center space-x-2 py-2.5 bg-slate-800 hover:bg-emerald-400 hover:text-slate-950 text-slate-200 border border-slate-700 hover:border-emerald-400 font-bold rounded-xl text-xs transition duration-200"
+                      className="w-full flex items-center justify-center space-x-2 py-2.5 bg-charcoal-800 hover:bg-emerald-400 hover:text-charcoal-950 text-slate-200 border border-charcoal-700 hover:border-emerald-400 font-bold rounded-xl text-xs transition duration-200"
                     >
                       <span>Open Workspace</span>
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -225,13 +225,13 @@ const Dashboard = () => {
               ))}
             </div>
           ) : (
-            <div className="p-10 text-center bg-slate-900/40 border border-slate-800/80 rounded-3xl space-y-3">
+            <div className="p-10 text-center bg-charcoal-900/40 border border-charcoal-800 rounded-3xl space-y-3">
               <DoorOpen className="w-8 h-8 text-slate-500 mx-auto" />
               <h3 className="text-base font-bold text-white">No coding rooms found</h3>
-              <p className="text-xs text-slate-400">Launch a new room to collaborate with your team!</p>
+              <p className="text-xs text-slate-400">Launch a new room to start collaborating with your crew!</p>
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="inline-flex items-center space-x-2 px-4 py-2 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-bold rounded-xl text-xs transition cursor-pointer"
+                className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-400 to-lime-300 text-charcoal-950 font-black rounded-xl text-xs transition cursor-pointer shadow-lg shadow-emerald-500/15"
               >
                 <Plus className="w-4 h-4 stroke-[2.5]" />
                 <span>Create Your First Room</span>

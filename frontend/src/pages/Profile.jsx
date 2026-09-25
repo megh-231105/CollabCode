@@ -70,7 +70,7 @@ const Profile = () => {
                   setEmail(currentUser.email);
                   setIsEditing(true);
                 }}
-                className="flex items-center space-x-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold rounded-xl text-xs transition cursor-pointer"
+                className="flex items-center space-x-1.5 px-4 py-2 bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold rounded-xl text-xs transition cursor-pointer"
               >
                 <Edit3 className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Edit Profile</span>
@@ -118,7 +118,7 @@ const Profile = () => {
                   Role Permission
                 </span>
                 <div className="flex items-center space-x-2">
-                  <Shield className="w-4 h-4 text-purple-400" />
+                  <Shield className="w-4 h-4 text-emerald-400" />
                   <span className="text-sm font-bold text-emerald-400 font-mono">{currentUser?.role}</span>
                 </div>
               </div>
@@ -128,7 +128,7 @@ const Profile = () => {
                   Member Since
                 </span>
                 <div className="flex items-center space-x-2">
-                  <Calendar className="w-4 h-4 text-cyan-400" />
+                  <Calendar className="w-4 h-4 text-lime-400" />
                   <span className="text-sm font-semibold text-slate-300">
                     {currentUser?.memberSince || 'Recent'}
                   </span>
@@ -141,7 +141,7 @@ const Profile = () => {
           <div className="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 space-y-5 flex flex-col justify-between backdrop-blur-xl">
             <div>
               <h2 className="text-base font-bold text-white flex items-center space-x-2 mb-4">
-                <Award className="w-4 h-4 text-amber-400" />
+                <Award className="w-4 h-4 text-lime-400" />
                 <span>Developer Metrics</span>
               </h2>
 
@@ -149,11 +149,11 @@ const Profile = () => {
                 <div className="p-4 bg-slate-950/90 rounded-xl border border-slate-800 text-center">
                   <span className="text-3xl font-black text-white">{rooms.length}</span>
                   <span className="text-[11px] text-slate-400 block font-semibold mt-1">
-                    Rooms Active
+                    Crew Rooms
                   </span>
                 </div>
                 <div className="p-4 bg-slate-950/90 rounded-xl border border-slate-800 text-center">
-                  <span className="text-3xl font-black text-cyan-400">{savedCode.length}</span>
+                  <span className="text-3xl font-black text-emerald-400">{savedCode.length}</span>
                   <span className="text-[11px] text-slate-400 block font-semibold mt-1">
                     Saved Programs
                   </span>
@@ -162,7 +162,7 @@ const Profile = () => {
 
               <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl space-y-2">
                 <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" /> FSD Project Live Backend
+                  <Sparkles className="w-3.5 h-3.5 text-lime-400" /> CodeCrew Active Cloud Workspace
                 </span>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   Real database persistence active via MongoDB Atlas & Express REST API with JWT authorization.

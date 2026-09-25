@@ -73,7 +73,7 @@ const AdminUsers = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
           <div>
             <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
-              <Users className="w-7 h-7 text-purple-400" />
+              <Users className="w-7 h-7 text-emerald-400" />
               <span>User Directory</span>
             </h1>
             <p className="mt-1 text-sm text-slate-400">
@@ -81,7 +81,7 @@ const AdminUsers = () => {
             </p>
           </div>
           <div className="text-xs font-mono font-bold text-slate-300 bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl">
-            Total Registered: <span className="text-purple-400">{usersList.length}</span>
+            Total Registered: <span className="text-emerald-400">{usersList.length}</span>
           </div>
         </div>
 
@@ -97,7 +97,7 @@ const AdminUsers = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search users by name or email..."
-              className="uiverse-input w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition text-sm font-medium"
+              className="uiverse-input w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition text-sm font-medium"
             />
           </div>
 
@@ -112,7 +112,7 @@ const AdminUsers = () => {
                 onClick={() => setRoleFilter(role)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition cursor-pointer ${
                   roleFilter === role
-                    ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
+                    ? 'bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/20'
                     : 'bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800'
                 }`}
               >
@@ -127,7 +127,7 @@ const AdminUsers = () => {
           <div className="overflow-x-auto">
             {loading ? (
               <div className="p-12 text-center text-slate-400 flex flex-col items-center justify-center space-y-3">
-                <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+                <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
                 <span className="text-xs font-medium">Loading registered users from MongoDB Atlas...</span>
               </div>
             ) : filteredUsers.length > 0 ? (
@@ -148,7 +148,7 @@ const AdminUsers = () => {
                       className="hover:bg-slate-800/40 transition duration-150"
                     >
                       <td className="py-4 px-6 font-bold text-white flex items-center space-x-3">
-                        <div className="w-8 h-8 rounded-xl bg-slate-800 text-purple-300 border border-purple-500/20 flex items-center justify-center font-bold text-xs shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-slate-800 text-emerald-300 border border-emerald-500/20 flex items-center justify-center font-bold text-xs shrink-0">
                           {user.name ? user.name[0].toUpperCase() : 'U'}
                         </div>
                         <span className="truncate">{user.name}</span>
@@ -158,7 +158,7 @@ const AdminUsers = () => {
                         <span
                           className={`inline-flex px-2.5 py-0.5 rounded-md text-[11px] font-bold font-mono ${
                             user.role === 'ADMIN'
-                              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                              ? 'bg-lime-500/20 text-lime-300 border border-lime-500/30'
                               : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                           }`}
                         >
@@ -175,7 +175,7 @@ const AdminUsers = () => {
                         <div className="inline-flex items-center space-x-2">
                           <button
                             onClick={() => setSelectedUser(user)}
-                            className="px-3 py-1.5 bg-slate-800 hover:bg-purple-600 hover:text-white text-slate-300 rounded-lg text-xs font-semibold transition cursor-pointer"
+                            className="px-3 py-1.5 bg-slate-800 hover:bg-emerald-400 hover:text-slate-950 text-slate-300 rounded-lg text-xs font-semibold transition cursor-pointer"
                           >
                             Inspect
                           </button>
@@ -206,7 +206,7 @@ const AdminUsers = () => {
             <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl p-6 backdrop-blur-xl">
               <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <UserCheck className="w-4 h-4 text-purple-400" />
+                  <UserCheck className="w-4 h-4 text-emerald-400" />
                   <span>User Details</span>
                 </h3>
                 <button
@@ -229,7 +229,7 @@ const AdminUsers = () => {
                 <div className="p-3.5 bg-slate-950/90 rounded-2xl border border-slate-800 flex justify-between">
                   <div>
                     <span className="text-slate-400 block mb-1 font-mono uppercase text-[10px]">Assigned Role</span>
-                    <span className="font-bold text-purple-300 font-mono">{selectedUser.role}</span>
+                    <span className="font-bold text-emerald-300 font-mono">{selectedUser.role}</span>
                   </div>
                   <div>
                     <span className="text-slate-400 block mb-1 font-mono uppercase text-[10px]">Joined Date</span>

@@ -1,16 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * ThreeUI-inspired Constellation / Particle Network canvas effect
- * Visual concept: Users ↔ Coding Rooms ↔ Real-time Collaboration
- * Highly optimized (2D Canvas, 60fps, interactive mouse-linkage, subtle opacity)
+ * ThreeUI & Vanta-inspired Constellation / Particle Network canvas effect
+ * Visual concept: Crew Members ↔ Shared Coding Room ↔ Real-time Execution
+ * Optimized 2D Canvas with smooth interactive mouse-linkage in Emerald & Warm Lime
  */
 const ConstellationNetwork = ({
-  particleCount = 55,
-  maxDistance = 140,
+  particleCount = 50,
+  maxDistance = 135,
   nodeColor = '#10b981',
-  lineColor = 'rgba(16, 185, 129, 0.15)',
-  speed = 0.45,
+  lineColor = 'rgba(16, 185, 129, 0.12)',
+  speed = 0.4,
   interactive = true,
   className = '',
 }) => {
@@ -36,7 +36,7 @@ const ConstellationNetwork = ({
     const mouse = {
       x: null,
       y: null,
-      radius: 130,
+      radius: 120,
     };
 
     const handleMouseMove = (e) => {
@@ -55,9 +55,9 @@ const ConstellationNetwork = ({
       canvas.addEventListener('mouseleave', handleMouseLeave);
     }
 
-    // Initialize Particles
+    // Initialize Particles in Emerald and Warm Lime palette
     const particles = [];
-    const colors = ['#10b981', '#06b6d4', '#3b82f6', '#14b8a6'];
+    const colors = ['#10b981', '#34d399', '#a3e635', '#059669', '#84cc16'];
 
     for (let i = 0; i < particleCount; i++) {
       particles.push({
@@ -65,7 +65,7 @@ const ConstellationNetwork = ({
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * speed,
         vy: (Math.random() - 0.5) * speed,
-        radius: Math.random() * 2 + 1.2,
+        radius: Math.random() * 1.8 + 1.2,
         color: colors[Math.floor(Math.random() * colors.length)],
         pulse: Math.random() * Math.PI,
       });
@@ -81,7 +81,7 @@ const ConstellationNetwork = ({
 
         p.x += p.vx;
         p.y += p.vy;
-        p.pulse += 0.03;
+        p.pulse += 0.025;
 
         // Bounce on boundaries
         if (p.x < 0 || p.x > width) p.vx *= -1;
@@ -96,14 +96,14 @@ const ConstellationNetwork = ({
           if (dist < mouse.radius) {
             const angle = Math.atan2(dy, dx);
             const force = (mouse.radius - dist) / mouse.radius;
-            p.x -= Math.cos(angle) * force * 1.5;
-            p.y -= Math.sin(angle) * force * 1.5;
+            p.x -= Math.cos(angle) * force * 1.2;
+            p.y -= Math.sin(angle) * force * 1.2;
 
-            // Draw line to mouse
+            // Draw line to mouse in warm lime
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(mouse.x, mouse.y);
-            ctx.strokeStyle = `rgba(6, 182, 212, ${0.3 * (1 - dist / mouse.radius)})`;
+            ctx.strokeStyle = `rgba(163, 230, 53, ${0.25 * (1 - dist / mouse.radius)})`;
             ctx.lineWidth = 0.8;
             ctx.stroke();
           }
@@ -117,7 +117,7 @@ const ConstellationNetwork = ({
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < maxDistance) {
-            const alpha = (1 - dist / maxDistance) * 0.22;
+            const alpha = (1 - dist / maxDistance) * 0.18;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
@@ -128,14 +128,14 @@ const ConstellationNetwork = ({
         }
 
         // Draw particle node
-        const currentRadius = p.radius + Math.sin(p.pulse) * 0.4;
+        const currentRadius = p.radius + Math.sin(p.pulse) * 0.35;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, Math.max(0.5, currentRadius), 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, Math.max(0.6, currentRadius), 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 6;
         ctx.shadowColor = p.color;
         ctx.fill();
-        ctx.shadowBlur = 0; // Reset
+        ctx.shadowBlur = 0;
       }
 
       animationFrameId = requestAnimationFrame(animate);
@@ -157,7 +157,7 @@ const ConstellationNetwork = ({
     <canvas
       ref={canvasRef}
       className={`absolute inset-0 pointer-events-auto z-0 ${className}`}
-      style={{ opacity: 0.85 }}
+      style={{ opacity: 0.8 }}
     />
   );
 };

@@ -52,7 +52,7 @@ const AdminDashboard = () => {
       value: statsData.totalUsers,
       change: 'Registered in MongoDB Atlas',
       icon: Users,
-      color: 'from-purple-500/20 to-indigo-500/10 text-purple-400 border-purple-500/30',
+      color: 'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-emerald-500/30',
       link: '/admin/users',
     },
     {
@@ -60,7 +60,7 @@ const AdminDashboard = () => {
       value: statsData.totalRooms,
       change: 'Cloud sessions created',
       icon: DoorOpen,
-      color: 'from-cyan-500/20 to-blue-500/10 text-cyan-400 border-cyan-500/30',
+      color: 'from-lime-500/20 to-emerald-500/10 text-lime-400 border-lime-500/30',
       link: '/admin/rooms',
     },
     {
@@ -68,15 +68,15 @@ const AdminDashboard = () => {
       value: statsData.activeRooms,
       change: 'Live coding environments',
       icon: Activity,
-      color: 'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-emerald-500/30',
+      color: 'from-emerald-500/20 to-lime-500/10 text-emerald-400 border-emerald-500/30',
       link: '/admin/rooms',
     },
     {
       title: 'Saved Programs',
       value: statsData.totalSavedCodes,
-      change: 'In student catalogs',
+      change: 'In developer catalogs',
       icon: Bookmark,
-      color: 'from-amber-500/20 to-orange-500/10 text-amber-400 border-amber-500/30',
+      color: 'from-amber-500/20 to-emerald-500/10 text-amber-400 border-amber-500/30',
       link: '/admin',
     },
   ];
@@ -87,8 +87,8 @@ const AdminDashboard = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
           <div>
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-bold mb-2">
-              <ShieldCheck className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-bold mb-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-lime-400" />
               <span>MongoDB Atlas Admin Console</span>
             </div>
             <h1 className="text-3xl font-black text-white tracking-tight">
@@ -102,7 +102,7 @@ const AdminDashboard = () => {
           <div className="flex items-center space-x-3">
             <Link
               to="/admin/users"
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-purple-600/20 cursor-pointer"
+              className="uiverse-btn-glow px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs transition shadow-lg shadow-emerald-500/20 cursor-pointer"
             >
               Manage Users
             </Link>
@@ -123,7 +123,7 @@ const AdminDashboard = () => {
               <Link
                 key={idx}
                 to={stat.link}
-                className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800/90 hover:border-slate-700 transition hover:-translate-y-1 block shadow-xl group backdrop-blur-xl"
+                className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800/90 hover:border-emerald-500/40 transition hover:-translate-y-1 block shadow-xl group backdrop-blur-xl"
               >
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-xs font-bold uppercase font-mono tracking-wider text-slate-400">
@@ -154,7 +154,7 @@ const AdminDashboard = () => {
           <div className="lg:col-span-2 bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 backdrop-blur-xl">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <Activity className="w-4 h-4 text-purple-400" />
+                <Activity className="w-4 h-4 text-emerald-400" />
                 <span>Recent Database Registrations</span>
               </h2>
               <span className="text-xs text-slate-400 font-mono">MongoDB Live</span>
@@ -168,12 +168,12 @@ const AdminDashboard = () => {
                     className="flex items-center justify-between p-3.5 rounded-xl bg-slate-950 border border-slate-800/80"
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-300 flex items-center justify-center font-bold text-xs">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-500/20">
                         {u.name ? u.name[0].toUpperCase() : 'U'}
                       </div>
                       <div>
                         <p className="text-xs font-bold text-white">
-                          <span className="text-purple-400 font-semibold">{u.name}</span>{' '}
+                          <span className="text-emerald-400 font-semibold">{u.name}</span>{' '}
                           registered account ({u.role})
                         </p>
                         <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5 font-mono">
@@ -214,11 +214,11 @@ const AdminDashboard = () => {
                 </div>
                 <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex justify-between">
                   <span className="text-slate-400">Frontend Engine:</span>
-                  <span className="font-bold text-cyan-400">React + Vite + Tailwind</span>
+                  <span className="font-bold text-lime-400">React + Vite + Tailwind</span>
                 </div>
                 <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex justify-between">
                   <span className="text-slate-400">Token Auth:</span>
-                  <span className="font-bold text-purple-400">JWT (7-Day Expiry)</span>
+                  <span className="font-bold text-emerald-400">JWT (7-Day Expiry)</span>
                 </div>
               </div>
             </div>
@@ -226,9 +226,9 @@ const AdminDashboard = () => {
             <div className="mt-6 pt-4 border-t border-slate-800 text-center">
               <Link
                 to="/dashboard"
-                className="text-xs text-purple-400 hover:text-purple-300 font-bold flex items-center justify-center gap-1 cursor-pointer"
+                className="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center justify-center gap-1 cursor-pointer"
               >
-                <span>Switch to Student Workspace</span>
+                <span>Switch to Developer Workspace</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>

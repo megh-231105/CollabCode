@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-slate-950;
+    @apply bg-charcoal-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-charcoal-950;
   }
 }
 
@@ -15,22 +15,22 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: #070a09;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #1b2622;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #2e4039;
 }
 
 /* UIverse & Cyber Developer Button Utilities */
 .uiverse-btn-glow {
   position: relative;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
 
@@ -41,7 +41,7 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, rgba(163, 230, 53, 0.15) 40%, transparent 70%);
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -51,22 +51,46 @@
   opacity: 1;
 }
 
+.uiverse-btn-lime {
+  position: relative;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.uiverse-btn-lime::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(163, 230, 53, 0.35) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.uiverse-btn-lime:hover::before {
+  opacity: 1;
+}
+
 /* UIverse Input Glow on Focus */
 .uiverse-input {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .uiverse-input:focus {
+  border-color: #10b981 !important;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2), 0 0 20px rgba(16, 185, 129, 0.15);
 }
 
-/* Shimmer gradient text effect for React Bits */
+/* Shimmer gradient text effect for React Bits - Emerald to Lime to Warm White */
 .react-bits-shimmer-text {
   background: linear-gradient(
     90deg,
     #ffffff 0%,
     #34d399 25%,
-    #38bdf8 50%,
+    #a3e635 50%,
     #34d399 75%,
     #ffffff 100%
   );
@@ -77,15 +101,39 @@
   animation: shimmer 4s linear infinite;
 }
 
-/* Glassmorphism Card Style */
+/* Emerald to Lime Gradient Text */
+.codecrew-gradient-text {
+  background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #a3e635 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glassmorphism Card Style - Deep Charcoal Base */
 .glass-card {
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(12, 17, 15, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(51, 65, 85, 0.6);
+  border: 1px solid rgba(34, 48, 43, 0.7);
 }
 
 .glass-card:hover {
-  border-color: rgba(52, 211, 153, 0.3);
-  box-shadow: 0 12px 30px -10px rgba(16, 185, 129, 0.1);
+  border-color: rgba(52, 211, 153, 0.35);
+  box-shadow: 0 12px 30px -10px rgba(16, 185, 129, 0.12);
 }
+
+/* Crew Node Pulsing Orbit */
+@keyframes crewPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+.crew-pulse {
+  animation: crewPulse 3s ease-in-out infinite;
+}
+

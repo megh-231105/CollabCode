@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useApp, getStarterCode } from '../context/AppContext';
 import { roomService, codeService } from '../services/api';
+import CodeCrewLogo from '../components/CodeCrewLogo';
 import {
-  Code2,
   ArrowLeft,
   Save,
   Play,
@@ -22,9 +22,7 @@ import {
   Globe,
   X,
   KeyRound,
-  ExternalLink,
   Sparkles,
-  HelpCircle,
 } from 'lucide-react';
 
 const RoomEditor = () => {
@@ -36,8 +34,8 @@ const RoomEditor = () => {
     const found = rooms.find((r) => r.id === roomId);
     if (found) return found;
     return {
-      id: roomId || 'ABC123',
-      name: 'Collaborative Coding Room',
+      id: roomId || 'CREW123',
+      name: 'CodeCrew Collaborative Session',
       description: 'Real-time collaborative code editor session.',
       language: 'Python',
       members: [
@@ -99,7 +97,7 @@ const RoomEditor = () => {
     const inviteUrl = window.location.origin + `/rooms/${currentRoom.id || roomId}`;
     navigator.clipboard.writeText(inviteUrl);
     setCopiedLink(true);
-    showToast(`Invite link copied! Share with your friends to code together.`);
+    showToast(`Invite link copied! Share with your crew to code together.`);
     setTimeout(() => setCopiedLink(false), 2500);
   };
 
@@ -218,29 +216,29 @@ const RoomEditor = () => {
   const lineNumbers = Array.from({ length: Math.max(lineCount, 18) }, (_, i) => i + 1);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans select-none">
+    <div className="min-h-screen bg-charcoal-950 text-slate-100 flex flex-col font-sans select-none">
       {/* Top Navbar */}
-      <header className="h-16 bg-slate-900 border-b border-slate-800 px-4 sm:px-6 flex items-center justify-between shrink-0 z-20">
+      <header className="h-16 bg-charcoal-900 border-b border-charcoal-750 px-4 sm:px-6 flex items-center justify-between shrink-0 z-20">
         {/* Left: Brand & Room Title */}
         <div className="flex items-center space-x-3 sm:space-x-4">
           <Link
             to="/rooms"
-            className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-white bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700 transition"
+            className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-white bg-charcoal-800 px-2.5 py-1.5 rounded-lg border border-charcoal-700 transition"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Rooms</span>
           </Link>
 
-          <div className="h-5 w-px bg-slate-800"></div>
+          <div className="h-5 w-px bg-charcoal-750"></div>
 
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-              <Code2 className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold">
+              <Users className="w-4 h-4 text-lime-400" />
             </div>
             <div>
               <h1 className="text-sm font-bold text-white tracking-tight flex items-center gap-2">
                 {currentRoom.name}
-                <span className="hidden sm:inline-flex text-[10px] font-mono text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded font-bold">
+                <span className="hidden sm:inline-flex text-[10px] font-mono text-lime-300 bg-lime-500/10 border border-lime-500/25 px-2 py-0.5 rounded font-bold">
                   {currentRoom.id || roomId}
                 </span>
               </h1>
@@ -248,21 +246,21 @@ const RoomEditor = () => {
           </div>
         </div>
 
-        {/* Center/Right: Language, Run, Stdin Toggle, Save, Invite, Leave */}
+        {/* Center/Right: Language, Stdin Toggle, Run, Save, Invite, Leave */}
         <div className="flex items-center space-x-2 sm:space-x-2.5">
           {/* Language Selector */}
-          <div className="flex items-center space-x-1.5 bg-slate-950 border border-slate-700/80 rounded-xl px-2 sm:px-2.5 py-1">
+          <div className="flex items-center space-x-1.5 bg-charcoal-950 border border-charcoal-700 rounded-xl px-2 sm:px-2.5 py-1">
             <span className="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-400 hidden sm:inline">Lang:</span>
             <select
               value={language}
               onChange={(e) => handleLanguageChange(e.target.value)}
               className="bg-transparent text-xs font-bold text-emerald-400 focus:outline-none cursor-pointer"
             >
-              <option value="Python" className="bg-slate-900 text-white">Python</option>
-              <option value="C++" className="bg-slate-900 text-white">C++</option>
-              <option value="Java" className="bg-slate-900 text-white">Java</option>
-              <option value="C" className="bg-slate-900 text-white">C</option>
-              <option value="JavaScript" className="bg-slate-900 text-white">JavaScript</option>
+              <option value="Python" className="bg-charcoal-900 text-white">Python</option>
+              <option value="C++" className="bg-charcoal-900 text-white">C++</option>
+              <option value="Java" className="bg-charcoal-900 text-white">Java</option>
+              <option value="C" className="bg-charcoal-900 text-white">C</option>
+              <option value="JavaScript" className="bg-charcoal-900 text-white">JavaScript</option>
             </select>
           </div>
 
@@ -271,15 +269,15 @@ const RoomEditor = () => {
             onClick={() => setShowStdin((prev) => !prev)}
             className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
               showStdin || stdin.trim()
-                ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300'
-                : 'bg-slate-800/80 hover:bg-slate-700/80 border-slate-700 text-slate-300'
+                ? 'bg-lime-500/15 border-lime-500/40 text-lime-300'
+                : 'bg-charcoal-800 hover:bg-charcoal-750 border-charcoal-700 text-slate-300'
             }`}
             title="Custom Standard Input (stdin) for input(), Scanner, cin"
           >
             <Keyboard className="w-3.5 h-3.5" />
             <span className="hidden md:inline font-semibold">Input (stdin)</span>
             {stdin.trim() && (
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-lime-400 animate-pulse"></span>
             )}
           </button>
 
@@ -287,7 +285,7 @@ const RoomEditor = () => {
           <button
             onClick={handleRunCode}
             disabled={isRunning}
-            className="uiverse-btn-glow flex items-center space-x-1.5 px-4 py-1.5 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black rounded-xl text-xs transition shadow-md shadow-emerald-500/20 disabled:opacity-50 cursor-pointer"
+            className="uiverse-btn-glow flex items-center space-x-1.5 px-4 py-1.5 bg-gradient-to-r from-emerald-400 via-lime-300 to-emerald-400 hover:from-emerald-300 hover:to-lime-200 text-charcoal-950 font-black rounded-xl text-xs transition shadow-md shadow-emerald-500/20 disabled:opacity-50 cursor-pointer"
           >
             {isRunning ? (
               <>
@@ -306,23 +304,23 @@ const RoomEditor = () => {
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold rounded-xl text-xs transition cursor-pointer"
+            className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 bg-charcoal-800 hover:bg-charcoal-750 text-slate-200 border border-charcoal-700 font-bold rounded-xl text-xs transition cursor-pointer"
           >
-            <Save className="w-3.5 h-3.5 text-cyan-400" />
+            <Save className="w-3.5 h-3.5 text-emerald-400" />
             <span>{isSaving ? 'Saving...' : 'Save'}</span>
           </button>
 
-          {/* Invite Friend Button */}
+          {/* Invite Crew Friend Button */}
           <button
             onClick={() => {
               handleCopyInviteLink();
               setIsInviteModalOpen(true);
             }}
-            className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold rounded-xl text-xs transition cursor-pointer"
+            className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold rounded-xl text-xs transition cursor-pointer"
             title="Invite friend to collaborate on this room"
           >
             <Share2 className="w-3.5 h-3.5" />
-            <span>Invite Friend</span>
+            <span>Invite Crew</span>
           </button>
 
           {/* Leave Room Button */}
@@ -342,15 +340,15 @@ const RoomEditor = () => {
       {/* Main Workspace Layout */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Left Side: Code Editor Workspace */}
-        <div className="flex-1 flex flex-col bg-slate-950 overflow-hidden">
+        <div className="flex-1 flex flex-col bg-charcoal-950 overflow-hidden">
           {/* File Tab Bar */}
-          <div className="h-9 bg-slate-900/70 border-b border-slate-800 flex items-center justify-between px-4 text-xs font-mono">
+          <div className="h-9 bg-charcoal-900/80 border-b border-charcoal-800 flex items-center justify-between px-4 text-xs font-mono">
             <div className="flex items-center space-x-2 text-slate-300">
               <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
               <span className="font-semibold text-emerald-400">
                 solution.{language === 'C++' ? 'cpp' : language === 'Java' ? 'java' : language === 'Python' ? 'py' : language === 'C' ? 'c' : 'js'}
               </span>
-              <span className="text-slate-400 text-[11px] hidden sm:inline">— Live Real Compiler Sandbox</span>
+              <span className="text-slate-400 text-[11px] hidden sm:inline">— CodeCrew Cloud Sandbox</span>
             </div>
             <div className="flex items-center space-x-3">
               <button
@@ -367,9 +365,9 @@ const RoomEditor = () => {
           </div>
 
           {/* Custom Textarea Editor Container */}
-          <div className="flex-1 flex overflow-hidden relative bg-slate-950">
+          <div className="flex-1 flex overflow-hidden relative bg-charcoal-950">
             {/* Line Numbers Column */}
-            <div className="w-12 bg-slate-950/90 border-r border-slate-800/80 pt-4 pb-4 select-none text-right pr-3 font-mono text-xs text-slate-500 shrink-0 leading-6">
+            <div className="w-12 bg-charcoal-950 border-r border-charcoal-850 pt-4 pb-4 select-none text-right pr-3 font-mono text-xs text-charcoal-500 shrink-0 leading-6">
               {lineNumbers.map((n) => (
                 <div key={n}>{n}</div>
               ))}
@@ -384,16 +382,16 @@ const RoomEditor = () => {
               spellCheck="false"
               autoCapitalize="off"
               autoComplete="off"
-              className="flex-1 w-full bg-slate-950 text-slate-100 font-mono text-xs sm:text-sm p-4 leading-6 resize-none focus:outline-none focus:ring-0 selection:bg-emerald-500/30 selection:text-white caret-emerald-400 overflow-auto whitespace-pre font-medium"
+              className="flex-1 w-full bg-charcoal-950 text-slate-100 font-mono text-xs sm:text-sm p-4 leading-6 resize-none focus:outline-none focus:ring-0 selection:bg-emerald-500/30 selection:text-white caret-emerald-400 overflow-auto whitespace-pre font-medium"
               placeholder="// Type your code here..."
             ></textarea>
           </div>
 
           {/* Standard Input (stdin) Panel Drawer */}
           {showStdin && (
-            <div className="h-28 bg-slate-900 border-t border-slate-800 flex flex-col shrink-0">
-              <div className="flex items-center justify-between px-4 py-1.5 bg-slate-950 border-b border-slate-800 text-[11px] font-bold text-slate-400">
-                <span className="flex items-center gap-1.5 text-cyan-400">
+            <div className="h-28 bg-charcoal-900 border-t border-charcoal-800 flex flex-col shrink-0">
+              <div className="flex items-center justify-between px-4 py-1.5 bg-charcoal-950 border-b border-charcoal-800 text-[11px] font-bold text-slate-400">
+                <span className="flex items-center gap-1.5 text-lime-400 font-mono">
                   <Keyboard className="w-3.5 h-3.5" /> Standard Input (stdin)
                 </span>
                 <span className="text-[10px] text-slate-500">Provided to input() / Scanner / cin on run</span>
@@ -402,19 +400,19 @@ const RoomEditor = () => {
                 value={stdin}
                 onChange={(e) => setStdin(e.target.value)}
                 placeholder="Enter input data here (each line will be fed to input() / cin / Scanner)..."
-                className="flex-1 w-full bg-slate-950 p-3 font-mono text-xs text-slate-200 resize-none focus:outline-none focus:ring-0 placeholder:text-slate-600"
+                className="flex-1 w-full bg-charcoal-950 p-3 font-mono text-xs text-slate-200 resize-none focus:outline-none focus:ring-0 placeholder:text-slate-600"
               ></textarea>
             </div>
           )}
 
           {/* Compiler & Terminal Execution Console Output */}
           {(output || isRunning) && (
-            <div className="h-56 bg-slate-900 border-t border-slate-800 flex flex-col shrink-0">
+            <div className="h-56 bg-charcoal-900 border-t border-charcoal-800 flex flex-col shrink-0">
               {/* Terminal Title Bar with Real Status Badges */}
-              <div className="flex items-center justify-between px-4 py-2 bg-slate-950 border-b border-slate-800 text-xs font-bold text-slate-400">
+              <div className="flex items-center justify-between px-4 py-2 bg-charcoal-950 border-b border-charcoal-800 text-xs font-bold text-slate-400">
                 <div className="flex items-center space-x-2.5">
-                  <span className="flex items-center gap-1.5 text-emerald-400">
-                    <Terminal className="w-3.5 h-3.5" /> Output Terminal
+                  <span className="flex items-center gap-1.5 text-emerald-400 font-mono">
+                    <Terminal className="w-3.5 h-3.5 text-lime-400" /> Output Terminal
                   </span>
 
                   {executionResult && (
@@ -440,7 +438,7 @@ const RoomEditor = () => {
                       </span>
 
                       {executionResult.version && (
-                        <span className="hidden sm:inline-flex text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded font-mono">
+                        <span className="hidden sm:inline-flex text-[10px] text-slate-400 bg-charcoal-800 px-2 py-0.5 rounded font-mono">
                           {executionResult.language} {executionResult.version}
                         </span>
                       )}
@@ -460,7 +458,7 @@ const RoomEditor = () => {
                       setOutput('');
                       setExecutionResult(null);
                     }}
-                    className="text-[11px] text-slate-500 hover:text-slate-300 transition cursor-pointer"
+                    className="text-[11px] text-slate-400 hover:text-slate-200 transition cursor-pointer"
                   >
                     Clear
                   </button>
@@ -468,9 +466,9 @@ const RoomEditor = () => {
               </div>
 
               {/* Terminal Body */}
-              <div className="flex-1 p-4 font-mono text-xs overflow-y-auto whitespace-pre-wrap leading-5 bg-slate-950 selection:bg-slate-800">
+              <div className="flex-1 p-4 font-mono text-xs overflow-y-auto whitespace-pre-wrap leading-5 bg-charcoal-950 selection:bg-charcoal-800">
                 {isRunning ? (
-                  <div className="flex items-center space-x-2 text-cyan-400">
+                  <div className="flex items-center space-x-2 text-emerald-400">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Compiling code and executing in sandbox engine...</span>
                   </div>
@@ -479,7 +477,7 @@ const RoomEditor = () => {
                     <pre className="text-rose-400 font-medium">
                       {output}
                     </pre>
-                    <div className="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-center justify-between">
+                    <div className="pt-2 border-t border-charcoal-800 text-[11px] text-slate-400 flex items-center justify-between">
                       <span className="text-amber-400/90 flex items-center gap-1">
                         ⚠️ Code encountered an error. Check syntax, variable names, or missing inputs.
                       </span>
@@ -488,14 +486,14 @@ const RoomEditor = () => {
                           handleCopyInviteLink();
                           setIsInviteModalOpen(true);
                         }}
-                        className="text-cyan-400 hover:text-cyan-300 underline cursor-pointer"
+                        className="text-lime-400 hover:text-lime-300 underline cursor-pointer"
                       >
-                        Invite friend to help debug
+                        Invite crew member to help debug
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <pre className="text-emerald-300/95 font-medium">
+                  <pre className="text-emerald-300 font-medium">
                     {output}
                   </pre>
                 )}
@@ -505,16 +503,16 @@ const RoomEditor = () => {
         </div>
 
         {/* Right Side: Room Members & Information Sidebar */}
-        <div className="w-full lg:w-72 bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col justify-between p-5 space-y-6 shrink-0 overflow-y-auto">
+        <div className="w-full lg:w-72 bg-charcoal-900 border-t lg:border-t-0 lg:border-l border-charcoal-750 flex flex-col justify-between p-5 space-y-6 shrink-0 overflow-y-auto">
           <div className="space-y-6">
             {/* Room Members Section */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 font-mono">
                   <Users className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Room Members</span>
+                  <span>Crew Members</span>
                 </h3>
-                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-bold text-lime-400 bg-lime-500/10 border border-lime-500/20 px-2 py-0.5 rounded-full">
                   {currentRoom.members?.length || 1} Online
                 </span>
               </div>
@@ -537,7 +535,7 @@ const RoomEditor = () => {
                     return (
                       <div
                         key={idx}
-                        className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800"
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-charcoal-950 border border-charcoal-800"
                       >
                         <div className="flex items-center space-x-2.5">
                           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -549,7 +547,7 @@ const RoomEditor = () => {
                           className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
                             isHost
                               ? 'bg-emerald-500/20 text-emerald-300'
-                              : 'bg-cyan-500/20 text-cyan-300'
+                              : 'bg-lime-500/20 text-lime-300'
                           }`}
                         >
                           {isHost ? 'Host' : 'Member'}
@@ -558,7 +556,7 @@ const RoomEditor = () => {
                     );
                   })
                 ) : (
-                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-charcoal-950 border border-charcoal-800">
                     <div className="flex items-center space-x-2.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
                       <span className="text-xs font-semibold text-white">
@@ -574,22 +572,22 @@ const RoomEditor = () => {
             </div>
 
             {/* Room Information Section */}
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Info className="w-3.5 h-3.5 text-cyan-400" />
+            <div className="p-4 rounded-2xl bg-charcoal-950 border border-charcoal-800 space-y-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 font-mono">
+                <Info className="w-3.5 h-3.5 text-lime-400" />
                 <span>Room Details</span>
               </h3>
 
               <div className="space-y-2 text-xs">
-                <div className="flex justify-between py-1 border-b border-slate-800/80">
+                <div className="flex justify-between py-1 border-b border-charcoal-800">
                   <span className="text-slate-400">Language:</span>
                   <span className="font-bold text-white">{language}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-slate-800/80">
+                <div className="flex justify-between py-1 border-b border-charcoal-800">
                   <span className="text-slate-400">Members:</span>
                   <span className="font-bold text-white">{currentRoom.members?.length || 1}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-slate-800/80">
+                <div className="flex justify-between py-1 border-b border-charcoal-800">
                   <span className="text-slate-400">Room Name:</span>
                   <span className="font-bold text-white truncate max-w-[120px]">
                     {currentRoom.name}
@@ -597,8 +595,8 @@ const RoomEditor = () => {
                 </div>
                 <div className="pt-1">
                   <span className="text-slate-400 block mb-1.5">Room ID:</span>
-                  <div className="flex items-center justify-between bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg">
-                    <span className="font-mono font-bold text-cyan-300 text-xs tracking-wider">
+                  <div className="flex items-center justify-between bg-charcoal-900 border border-charcoal-750 px-3 py-1.5 rounded-lg">
+                    <span className="font-mono font-bold text-lime-300 text-xs tracking-wider">
                       {currentRoom.id || roomId}
                     </span>
                     <button
@@ -614,29 +612,29 @@ const RoomEditor = () => {
             </div>
 
             {/* Invite Friend Card */}
-            <div className="p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-500/20 space-y-2.5">
+            <div className="p-3.5 rounded-2xl bg-charcoal-950 border border-emerald-500/25 space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
-                  <Share2 className="w-3.5 h-3.5" /> Invite Collaborators
+                <span className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                  <Share2 className="w-3.5 h-3.5 text-lime-400" /> Invite Your Crew
                 </span>
-                <span className="text-[10px] bg-indigo-500/20 text-indigo-300 font-semibold px-2 py-0.5 rounded-full">
+                <span className="text-[10px] bg-emerald-500/15 text-emerald-300 font-semibold px-2 py-0.5 rounded-full">
                   Real-time
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                Invite peers to join this coding workspace using Room ID or direct invite link.
+                Invite teammates to join this coding workspace using Room ID or direct link.
               </p>
               <div className="space-y-2 pt-1">
                 <button
                   onClick={() => setIsInviteModalOpen(true)}
-                  className="w-full py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20 cursor-pointer"
+                  className="w-full py-2 bg-gradient-to-r from-emerald-500 to-lime-400 hover:from-emerald-400 hover:to-lime-300 text-charcoal-950 text-xs font-black rounded-xl transition flex items-center justify-center gap-2 shadow-md shadow-emerald-500/15 cursor-pointer"
                 >
                   <Share2 className="w-3.5 h-3.5" />
                   <span>Invite Friends (Get Link)</span>
                 </button>
                 <button
                   onClick={handleCopyRoomId}
-                  className="w-full py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-[11px] font-semibold rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer font-mono"
+                  className="w-full py-1.5 bg-charcoal-900 hover:bg-charcoal-800 border border-charcoal-700 text-slate-300 hover:text-white text-[11px] font-semibold rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer font-mono"
                 >
                   {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                   <span>{copied ? 'Room ID Copied!' : `Copy Room ID (${currentRoom.id || roomId})`}</span>
@@ -646,31 +644,31 @@ const RoomEditor = () => {
           </div>
 
           {/* Quick Helper Tips */}
-          <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/60 text-[11px] text-slate-400 space-y-1">
-            <span className="font-semibold text-slate-300 block">💡 Pro Tip:</span>
-            <p>If your code uses <code className="text-cyan-300 font-mono">input()</code> or <code className="text-cyan-300 font-mono">cin</code>, click <strong className="text-cyan-300">Input (stdin)</strong> to provide input values before running.</p>
+          <div className="p-3 bg-charcoal-950 rounded-xl border border-charcoal-800 text-[11px] text-slate-400 space-y-1">
+            <span className="font-semibold text-slate-300 block font-mono">💡 Pro Tip:</span>
+            <p>If your code uses <code className="text-lime-300 font-mono">input()</code> or <code className="text-lime-300 font-mono">cin</code>, click <strong className="text-lime-300">Input (stdin)</strong> to provide input values before running.</p>
           </div>
         </div>
       </div>
 
       {/* Invite Collaborators Modal */}
       {isInviteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-          <div className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal-950/80 backdrop-blur-md animate-fadeIn">
+          <div className="relative w-full max-w-lg bg-charcoal-900 border border-charcoal-750 rounded-3xl shadow-2xl overflow-hidden text-slate-100 backdrop-blur-xl">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-900/60">
+            <div className="flex items-center justify-between p-6 border-b border-charcoal-750 bg-charcoal-950">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                  <Share2 className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <Share2 className="w-5 h-5 text-lime-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white tracking-tight">Invite Collaborator</h3>
+                  <h3 className="text-lg font-bold text-white tracking-tight">Invite Crew Member</h3>
                   <p className="text-xs text-slate-400">Share room access to code together in real-time</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsInviteModalOpen(false)}
-                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer"
+                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-charcoal-800 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -680,20 +678,20 @@ const RoomEditor = () => {
             <div className="p-6 space-y-6">
               {/* Option 1: Room ID */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                  <KeyRound className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Option 1: Share Room ID (Easiest for all environments)</span>
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5 font-mono">
+                  <KeyRound className="w-3.5 h-3.5 text-lime-400" />
+                  <span>Option 1: Share Room ID</span>
                 </label>
                 <div className="flex items-center space-x-2">
-                  <div className="flex-1 bg-slate-950 border border-slate-700 px-4 py-3 rounded-xl flex items-center justify-between font-mono">
-                    <span className="text-lg font-black tracking-widest text-cyan-300">
+                  <div className="flex-1 bg-charcoal-950 border border-charcoal-700 px-4 py-3 rounded-xl flex items-center justify-between font-mono">
+                    <span className="text-lg font-black tracking-widest text-lime-300">
                       {currentRoom.id || roomId}
                     </span>
-                    <span className="text-[11px] text-slate-500 uppercase font-sans font-semibold">6-Char Room Key</span>
+                    <span className="text-[11px] text-slate-500 uppercase font-sans font-semibold">6-Char Key</span>
                   </div>
                   <button
                     onClick={handleCopyRoomId}
-                    className="px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 transition cursor-pointer shrink-0"
+                    className="px-4 py-3 bg-charcoal-800 hover:bg-charcoal-750 border border-charcoal-700 text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 transition cursor-pointer shrink-0"
                   >
                     {copied ? (
                       <>
@@ -709,13 +707,13 @@ const RoomEditor = () => {
                   </button>
                 </div>
                 <p className="text-[11px] text-slate-400">
-                  Your friend can log into their CollabCode dashboard and click <strong className="text-slate-200">"Join Room"</strong>, then enter this ID.
+                  Your teammate can log in and click <strong className="text-slate-200">&quot;Join Room&quot;</strong>, then paste this Room ID.
                 </p>
               </div>
 
               {/* Option 2: Direct Share Link */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5 font-mono">
                   <Globe className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Option 2: Direct Invite URL</span>
                 </label>
@@ -724,15 +722,15 @@ const RoomEditor = () => {
                     type="text"
                     readOnly
                     value={`${window.location.origin}/rooms/${currentRoom.id || roomId}`}
-                    className="flex-1 bg-slate-950 border border-slate-700 px-3.5 py-2.5 rounded-xl text-xs text-slate-300 font-mono select-all focus:outline-none"
+                    className="flex-1 bg-charcoal-950 border border-charcoal-700 px-3.5 py-2.5 rounded-xl text-xs text-slate-300 font-mono select-all focus:outline-none"
                   />
                   <button
                     onClick={handleCopyInviteLink}
-                    className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs flex items-center space-x-1.5 transition cursor-pointer shrink-0 shadow-md shadow-emerald-500/20"
+                    className="px-4 py-2.5 bg-gradient-to-r from-emerald-400 to-lime-300 text-charcoal-950 font-black rounded-xl text-xs flex items-center space-x-1.5 transition cursor-pointer shrink-0 shadow-md shadow-emerald-500/20"
                   >
                     {copiedLink ? (
                       <>
-                        <Check className="w-4 h-4 text-slate-950 stroke-[3]" />
+                        <Check className="w-4 h-4 text-charcoal-950 stroke-[3]" />
                         <span>Copied!</span>
                       </>
                     ) : (
@@ -745,40 +743,32 @@ const RoomEditor = () => {
                 </div>
               </div>
 
-              {/* Smart Environment Note */}
+              {/* Localhost / Cloud Live guidance */}
               {window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? (
-                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200/90 text-xs space-y-2">
-                  <div className="flex items-center space-x-2 font-bold text-amber-300">
-                    <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-                    <span>Testing on Localhost?</span>
+                <div className="p-4 rounded-xl bg-charcoal-950 border border-charcoal-750 text-slate-300 text-xs space-y-2">
+                  <div className="flex items-center space-x-2 font-bold text-lime-300">
+                    <Sparkles className="w-4 h-4 text-lime-400 shrink-0" />
+                    <span>Local Development &amp; Cloud Ready</span>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-amber-100/80">
-                    Because <code className="bg-amber-950/60 px-1 py-0.5 rounded text-amber-300">localhost</code> points to your own computer, sharing a <code className="bg-amber-950/60 px-1 py-0.5 rounded text-amber-300">localhost</code> URL with a friend on another computer will show <em>"localhost refused to connect"</em>.
+                  <p className="text-[11px] leading-relaxed text-slate-400">
+                    When testing on localhost, share the 6-character Room ID for joining. When deployed on the cloud, direct URL links work instantly everywhere.
                   </p>
-                  <div className="pt-1 text-[11px] text-slate-300 space-y-1">
-                    <p className="font-semibold text-white">How your friend can join right now:</p>
-                    <ul className="list-disc pl-4 space-y-1 text-slate-300">
-                      <li><strong>Share Room ID:</strong> Give them the 6-character Room ID above to enter in their app.</li>
-                      <li><strong>Wi-Fi LAN:</strong> If on the same Wi-Fi, share your local IP (e.g. <code className="text-cyan-300">http://192.168.x.x:3000/rooms/{currentRoom.id || roomId}</code>).</li>
-                      <li><strong>Production Cloud:</strong> When deployed on Vercel/Netlify, the direct link works anywhere in the world automatically!</li>
-                    </ul>
-                  </div>
                 </div>
               ) : (
                 <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center space-x-2.5">
                   <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>
-                    <strong>Cloud Live:</strong> Anyone in the world can click this link to join your coding session!
+                    <strong>Cloud Live:</strong> Anyone with access can join this CodeCrew room!
                   </span>
                 </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-end p-4 border-t border-slate-800 bg-slate-900/40">
+            <div className="flex items-center justify-end p-4 border-t border-charcoal-750 bg-charcoal-950">
               <button
                 onClick={() => setIsInviteModalOpen(false)}
-                className="px-5 py-2 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl transition cursor-pointer"
+                className="px-5 py-2 text-xs font-bold bg-charcoal-800 hover:bg-charcoal-750 text-slate-200 rounded-xl transition cursor-pointer"
               >
                 Done
               </button>

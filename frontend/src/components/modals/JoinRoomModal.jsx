@@ -45,7 +45,7 @@ const JoinRoomModal = () => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-900/60">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
               <LogIn className="w-5 h-5" />
             </div>
             <div>
@@ -87,7 +87,7 @@ const JoinRoomModal = () => {
                   setError('');
                 }}
                 placeholder="e.g. ABC123"
-                className="uiverse-input w-full pl-10 pr-4 py-2.5 bg-slate-950/90 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 font-mono tracking-widest focus:outline-none focus:border-cyan-500 transition text-sm font-bold"
+                className="uiverse-input w-full pl-10 pr-4 py-2.5 bg-slate-950/90 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 font-mono tracking-widest focus:outline-none focus:border-emerald-500 transition text-sm font-bold"
               />
             </div>
             <p className="mt-2 text-xs text-slate-400">
@@ -104,7 +104,7 @@ const JoinRoomModal = () => {
                     type="button"
                     key={r.id || r._id}
                     onClick={() => setRoomId(r.id)}
-                    className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded-lg font-mono text-xs font-bold transition cursor-pointer border border-slate-700"
+                    className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-emerald-300 rounded-lg font-mono text-xs font-bold transition cursor-pointer border border-slate-700"
                   >
                     {r.id}
                   </button>
@@ -125,7 +125,7 @@ const JoinRoomModal = () => {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 text-xs font-black bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-xl transition shadow-lg shadow-cyan-500/20 cursor-pointer disabled:opacity-50"
+              className="uiverse-btn-glow px-6 py-2.5 text-xs font-black bg-emerald-400 hover:bg-emerald-300 text-slate-950 rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
             >
               {loading ? 'Joining...' : 'Join Workspace'}
             </button>

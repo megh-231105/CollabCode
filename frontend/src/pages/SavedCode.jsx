@@ -6,7 +6,6 @@ import {
   Bookmark,
   Search,
   Filter,
-  Code2,
   Copy,
   Check,
   Trash2,
@@ -27,7 +26,7 @@ const SavedCode = () => {
   const [copiedId, setCopiedId] = useState(null);
   const navigate = useNavigate();
 
-  const languages = ['ALL', 'C++', 'C', 'Java', 'Python', 'JavaScript'];
+  const languages = ['ALL', 'Python', 'C++', 'Java', 'C', 'JavaScript'];
 
   const filteredSnippets = savedCode.filter((item) => {
     const titleMatch = (item.title || '').toLowerCase().includes(searchTerm.toLowerCase());
@@ -63,17 +62,17 @@ const SavedCode = () => {
     <AppLayout>
       <div className="p-6 md:p-10 max-w-7xl mx-auto w-full space-y-8 font-sans">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-charcoal-800">
           <div>
             <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
-              <Bookmark className="w-7 h-7 text-cyan-400" />
+              <Bookmark className="w-7 h-7 text-emerald-400" />
               <span>My Saved Code</span>
             </h1>
             <p className="mt-1 text-sm text-slate-400">
-              Access and manage your personal repository of algorithm snippets saved to MongoDB Atlas.
+              Access and manage your personal repository of algorithm snippets saved in MongoDB Atlas.
             </p>
           </div>
-          <div className="text-xs font-mono font-bold text-slate-300 bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl">
+          <div className="text-xs font-mono font-bold text-slate-300 bg-charcoal-900 border border-charcoal-800 px-4 py-2 rounded-xl">
             Total Snippets: <span className="text-emerald-400">{savedCode.length}</span>
           </div>
         </div>
@@ -90,7 +89,7 @@ const SavedCode = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search snippet title or code contents..."
-              className="uiverse-input w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition text-sm font-medium"
+              className="uiverse-input w-full pl-10 pr-4 py-2.5 bg-charcoal-900 border border-charcoal-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition text-sm font-medium"
             />
           </div>
 
@@ -105,8 +104,8 @@ const SavedCode = () => {
                 onClick={() => setSelectedLanguage(lang)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition whitespace-nowrap cursor-pointer ${
                   selectedLanguage === lang
-                    ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20'
-                    : 'bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800'
+                    ? 'bg-gradient-to-r from-emerald-400 to-lime-300 text-charcoal-950 font-black shadow-md shadow-emerald-500/20'
+                    : 'bg-charcoal-900 hover:bg-charcoal-800 text-slate-400 hover:text-white border border-charcoal-800'
                 }`}
               >
                 {lang}
@@ -115,45 +114,45 @@ const SavedCode = () => {
           </div>
         </div>
 
-        {/* Saved Code Cards Grid (Shards React Style) */}
+        {/* Saved Code Cards Grid (Shards Style) */}
         {filteredSnippets.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredSnippets.map((snippet) => (
               <div
                 key={snippet.id || snippet._id}
-                className="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition hover:shadow-2xl group backdrop-blur-xl"
+                className="bg-charcoal-900/80 border border-charcoal-800 rounded-2xl p-6 flex flex-col justify-between hover:border-charcoal-700 transition hover:shadow-2xl group backdrop-blur-xl"
               >
                 <div>
                   {/* Top Bar */}
                   <div className="flex items-center justify-between mb-3">
-                    <span className="px-2.5 py-1 rounded-md text-[11px] font-bold font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                    <span className="px-2.5 py-1 rounded-md text-[11px] font-bold font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                       {snippet.language}
                     </span>
                     <span className="text-xs text-slate-400 flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
+                      <Clock className="w-3.5 h-3.5 text-slate-500" />
                       <span>{snippet.lastSaved || 'Saved'}</span>
                     </span>
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-lg font-bold text-white group-hover:text-cyan-300 transition mb-3 tracking-tight truncate">
+                  <h3 className="text-lg font-bold text-white group-hover:text-emerald-300 transition mb-3 tracking-tight truncate">
                     {snippet.title}
                   </h3>
 
                   {/* Code Preview Box */}
-                  <div className="bg-slate-950 rounded-xl p-3.5 border border-slate-800/80 font-mono text-[11px] text-slate-400 max-h-28 overflow-hidden relative mb-4">
-                    <pre className="whitespace-pre overflow-x-hidden leading-5">
+                  <div className="bg-charcoal-950 rounded-xl p-3.5 border border-charcoal-850 font-mono text-[11px] text-slate-400 max-h-28 overflow-hidden relative mb-4">
+                    <pre className="whitespace-pre overflow-x-hidden leading-5 font-medium">
                       {(snippet.code || '').slice(0, 160)}...
                     </pre>
-                    <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-slate-950 to-transparent"></div>
+                    <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-charcoal-950 to-transparent"></div>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="pt-3 border-t border-slate-800/80 flex items-center gap-2">
+                <div className="pt-3 border-t border-charcoal-800 flex items-center gap-2">
                   <button
                     onClick={() => setActiveSnippet(snippet)}
-                    className="flex-1 flex items-center justify-center space-x-1.5 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition cursor-pointer"
+                    className="flex-1 flex items-center justify-center space-x-1.5 py-2 px-3 bg-charcoal-800 hover:bg-charcoal-750 text-slate-200 font-bold rounded-xl text-xs transition cursor-pointer"
                   >
                     <FileCode2 className="w-3.5 h-3.5" />
                     <span>View Code</span>
@@ -170,7 +169,7 @@ const SavedCode = () => {
 
                   <button
                     onClick={() => handleCopy(snippet)}
-                    className="p-2 text-slate-400 hover:text-white bg-slate-950 rounded-xl border border-slate-800 hover:bg-slate-800 transition cursor-pointer"
+                    className="p-2 text-slate-400 hover:text-white bg-charcoal-950 rounded-xl border border-charcoal-800 hover:bg-charcoal-800 transition cursor-pointer"
                     title="Copy Code"
                   >
                     {copiedId === (snippet.id || snippet._id) ? (
@@ -182,7 +181,7 @@ const SavedCode = () => {
 
                   <button
                     onClick={() => deleteSavedCode(snippet.id || snippet._id)}
-                    className="p-2 text-slate-400 hover:text-rose-400 bg-slate-950 rounded-xl border border-slate-800 hover:bg-rose-500/10 transition cursor-pointer"
+                    className="p-2 text-slate-400 hover:text-rose-400 bg-charcoal-950 rounded-xl border border-charcoal-800 hover:bg-rose-500/10 transition cursor-pointer"
                     title="Delete"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -192,7 +191,7 @@ const SavedCode = () => {
             ))}
           </div>
         ) : (
-          <div className="p-12 text-center bg-slate-900/40 border border-slate-800/80 rounded-3xl space-y-3">
+          <div className="p-12 text-center bg-charcoal-900/40 border border-charcoal-800 rounded-3xl space-y-3">
             <Bookmark className="w-8 h-8 text-slate-500 mx-auto" />
             <h3 className="text-base font-bold text-white">No saved code found</h3>
             <p className="text-xs text-slate-400">Save algorithms directly from your coding rooms to view them here.</p>
@@ -202,33 +201,33 @@ const SavedCode = () => {
 
       {/* Snippet Viewer Modal */}
       {activeSnippet && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-          <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] backdrop-blur-xl">
-            <div className="flex items-center justify-between p-5 border-b border-slate-800 bg-slate-950">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal-950/80 backdrop-blur-md animate-fadeIn font-sans">
+          <div className="relative w-full max-w-2xl bg-charcoal-900 border border-charcoal-750 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] backdrop-blur-xl">
+            <div className="flex items-center justify-between p-5 border-b border-charcoal-750 bg-charcoal-950">
               <div className="flex items-center space-x-3">
-                <span className="px-2.5 py-1 rounded text-xs font-bold font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                <span className="px-2.5 py-1 rounded text-xs font-bold font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                   {activeSnippet.language}
                 </span>
                 <h3 className="text-base font-bold text-white tracking-tight">{activeSnippet.title}</h3>
               </div>
               <button
                 onClick={() => setActiveSnippet(null)}
-                className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-charcoal-800 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex-1 p-6 overflow-auto bg-slate-950 font-mono text-xs text-slate-200">
+            <div className="flex-1 p-6 overflow-auto bg-charcoal-950 font-mono text-xs text-slate-200">
               <pre className="whitespace-pre leading-6">{activeSnippet.code}</pre>
             </div>
 
-            <div className="p-4 border-t border-slate-800 bg-slate-900 flex items-center justify-between">
+            <div className="p-4 border-t border-charcoal-750 bg-charcoal-900 flex items-center justify-between">
               <span className="text-xs text-slate-400 font-medium">Saved: {activeSnippet.lastSaved || 'Recently'}</span>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => handleCopy(activeSnippet)}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition cursor-pointer"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-charcoal-800 hover:bg-charcoal-750 text-slate-200 rounded-xl text-xs font-bold transition cursor-pointer"
                 >
                   <Copy className="w-3.5 h-3.5" />
                   <span>Copy Code</span>
@@ -238,7 +237,7 @@ const SavedCode = () => {
                     handleOpenInNewRoom(activeSnippet);
                     setActiveSnippet(null);
                   }}
-                  className="uiverse-btn-glow flex items-center space-x-1.5 px-4 py-2 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black rounded-xl text-xs transition cursor-pointer"
+                  className="uiverse-btn-glow flex items-center space-x-1.5 px-4 py-2 bg-gradient-to-r from-emerald-400 to-lime-300 text-charcoal-950 font-black rounded-xl text-xs transition cursor-pointer shadow-md shadow-emerald-500/20"
                 >
                   <span>Launch in Room</span>
                 </button>
@@ -252,3 +251,4 @@ const SavedCode = () => {
 };
 
 export default SavedCode;
+

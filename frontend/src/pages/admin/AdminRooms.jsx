@@ -69,7 +69,7 @@ const AdminRooms = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
           <div>
             <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
-              <DoorOpen className="w-7 h-7 text-purple-400" />
+              <DoorOpen className="w-7 h-7 text-emerald-400" />
               <span>Coding Rooms Directory</span>
             </h1>
             <p className="mt-1 text-sm text-slate-400">
@@ -79,7 +79,7 @@ const AdminRooms = () => {
 
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-purple-600/20 cursor-pointer"
+            className="uiverse-btn-glow flex items-center space-x-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs transition shadow-lg shadow-emerald-500/20 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Create New Room</span>
@@ -96,7 +96,7 @@ const AdminRooms = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search room name, owner, language, or Room ID..."
-            className="uiverse-input w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition text-sm font-medium"
+            className="uiverse-input w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition text-sm font-medium"
           />
         </div>
 
@@ -105,7 +105,7 @@ const AdminRooms = () => {
           <div className="overflow-x-auto">
             {loading ? (
               <div className="p-12 text-center text-slate-400 flex flex-col items-center justify-center space-y-3">
-                <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+                <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
                 <span className="text-xs font-medium">Loading coding rooms from MongoDB Atlas...</span>
               </div>
             ) : filtered.length > 0 ? (
@@ -128,12 +128,12 @@ const AdminRooms = () => {
                     >
                       <td className="py-4 px-6 font-bold text-white">
                         <div className="flex items-center space-x-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-slate-800 text-purple-300 border border-purple-500/20 flex items-center justify-center font-bold text-xs shrink-0">
+                          <div className="w-8 h-8 rounded-xl bg-slate-800 text-emerald-300 border border-emerald-500/20 flex items-center justify-center font-bold text-xs shrink-0">
                             <DoorOpen className="w-4 h-4" />
                           </div>
                           <div>
                             <span className="block truncate max-w-[200px]">{room.name}</span>
-                            <span className="block text-[10px] font-mono text-cyan-400">
+                            <span className="block text-[10px] font-mono text-emerald-400">
                               ID: {room.id}
                             </span>
                           </div>
@@ -141,7 +141,7 @@ const AdminRooms = () => {
                       </td>
                       <td className="py-4 px-6 font-semibold text-slate-200">{room.owner}</td>
                       <td className="py-4 px-6">
-                        <span className="inline-flex px-2.5 py-0.5 rounded-md text-[11px] font-bold font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                        <span className="inline-flex px-2.5 py-0.5 rounded-md text-[11px] font-bold font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                           {room.language}
                         </span>
                       </td>

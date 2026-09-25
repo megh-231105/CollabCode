@@ -200,7 +200,9 @@ const getRoomById = async (req, res) => {
     // If authenticated user is not in room members, automatically add them as a Member
     if (req.user) {
       const isMember = room.members.some(
-        (m) => m.user && m.user.toString() === req.user._id.toString()
+        (m) =>
+          (m.user && m.user.toString() === req.user._id.toString()) ||
+          m.name === req.user.name
       );
       if (!isMember) {
         room.members.push({
@@ -262,7 +264,9 @@ const joinRoom = async (req, res) => {
     }
 
     const isMember = room.members.some(
-      (m) => m.user && m.user.toString() === req.user._id.toString()
+      (m) =>
+        (m.user && m.user.toString() === req.user._id.toString()) ||
+        m.name === req.user.name
     );
 
     if (!isMember) {

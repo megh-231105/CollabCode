@@ -30,7 +30,7 @@ import {
 const RoomEditor = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
-  const { rooms, saveCodeSnippet, showToast } = useApp();
+  const { currentUser, rooms, saveCodeSnippet, showToast } = useApp();
 
   const [currentRoom, setCurrentRoom] = useState(() => {
     const found = rooms.find((r) => r.id === roomId);
@@ -41,7 +41,7 @@ const RoomEditor = () => {
       description: 'Real-time collaborative code editor session.',
       language: 'Python',
       members: [
-        { name: 'You', role: 'Host', isOnline: true, color: 'bg-emerald-500' },
+        { name: currentUser?.name || 'You', role: 'Host', isOnline: true, color: 'bg-emerald-500' },
       ],
       code: getStarterCode('Python'),
     };
@@ -520,28 +520,56 @@ const RoomEditor = () => {
               </div>
 
               <div className="space-y-2">
-                {currentRoom.members?.map((member, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800"
-                  >
+                {currentRoom.members && currentRoom.members.length > 0 ? (
+                  currentRoom.members.map((member, idx) => {
+                    const isCurrent =
+                      (currentUser && (member.name === currentUser.name || (member.user && (member.user === currentUser._id || member.user === currentUser.id)))) ||
+                      member.name === 'You';
+                    const isHost =
+                      member.role === 'Host' ||
+                      (currentRoom.owner && (member.name === currentRoom.owner || (currentRoom.ownerId && member.user === currentRoom.ownerId)));
+
+                    let displayName = member.name;
+                    if (isCurrent) {
+                      displayName = member.name === 'You' ? (currentUser?.name ? `${currentUser.name} (You)` : 'You') : `${member.name} (You)`;
+                    }
+
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800"
+                      >
+                        <div className="flex items-center space-x-2.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                          <span className="text-xs font-semibold text-white">
+                            {displayName}
+                          </span>
+                        </div>
+                        <span
+                          className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                            isHost
+                              ? 'bg-emerald-500/20 text-emerald-300'
+                              : 'bg-cyan-500/20 text-cyan-300'
+                          }`}
+                        >
+                          {isHost ? 'Host' : 'Member'}
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800">
                     <div className="flex items-center space-x-2.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
                       <span className="text-xs font-semibold text-white">
-                        {member.name} {member.role === 'Host' ? '(Host)' : ''}
+                        {currentUser?.name ? `${currentUser.name} (You)` : 'You'}
                       </span>
                     </div>
-                    <span
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
-                        member.role === 'Host'
-                          ? 'bg-emerald-500/20 text-emerald-300'
-                          : 'bg-cyan-500/20 text-cyan-300'
-                      }`}
-                    >
-                      {member.role || 'Member'}
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                      Host
                     </span>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 

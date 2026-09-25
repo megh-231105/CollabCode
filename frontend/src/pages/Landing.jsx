@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
+import { useApp } from '../context/AppContext';
 import {
   Code2,
   ShieldCheck,
@@ -20,6 +21,17 @@ import {
 } from 'lucide-react';
 
 const Landing = () => {
+  const { currentUser, rooms } = useApp() || {};
+
+  // Dynamic preview information based on logged-in user and real rooms
+  const activeUser = currentUser && currentUser.name && currentUser.name !== 'Guest User' ? currentUser : null;
+  const previewRoom = rooms && rooms.length > 0 ? rooms[0] : null;
+
+  const currentUserName = activeUser?.name || 'You';
+  const previewRoomId = previewRoom?.id || 'ABC123';
+  const previewLanguage = previewRoom?.language || 'C++';
+  const previewMembersCount = previewRoom?.members?.length || 2;
+
   const features = [
     {
       icon: ShieldCheck,
@@ -125,10 +137,10 @@ const Landing = () => {
               <div className="flex items-center space-x-3 text-xs text-slate-400">
                 <span className="flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                  2 Members Live
+                  {previewMembersCount} Members Live
                 </span>
                 <span className="bg-slate-800 px-2.5 py-1 rounded text-emerald-300 font-mono text-[11px]">
-                  C++ 17
+                  {previewLanguage === 'C++' ? 'C++ 17' : previewLanguage}
                 </span>
               </div>
             </div>
@@ -185,7 +197,9 @@ const Landing = () => {
                     <div className="flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800">
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-                        <span className="text-slate-200 font-sans text-xs font-semibold">Meghana (You)</span>
+                        <span className="text-slate-200 font-sans text-xs font-semibold">
+                          {activeUser ? `${activeUser.name} (You)` : 'You (Host)'}
+                        </span>
                       </div>
                       <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-sans">
                         Host
@@ -194,7 +208,11 @@ const Landing = () => {
                     <div className="flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800">
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
-                        <span className="text-slate-200 font-sans text-xs font-semibold">Rahul</span>
+                        <span className="text-slate-200 font-sans text-xs font-semibold">
+                          {previewRoom?.members && previewRoom.members.length > 1
+                            ? previewRoom.members.find((m) => m.name !== currentUserName)?.name || 'Peer Collaborator'
+                            : 'Peer Collaborator'}
+                        </span>
                       </div>
                       <span className="text-[10px] bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded font-sans">
                         Member
@@ -205,7 +223,7 @@ const Landing = () => {
 
                 <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
                   <p className="text-[11px] font-sans text-slate-400">Room Status</p>
-                  <p className="text-xs font-mono font-bold text-emerald-400 mt-0.5">ROOM ID: ABC123</p>
+                  <p className="text-xs font-mono font-bold text-emerald-400 mt-0.5">ROOM ID: {previewRoomId}</p>
                 </div>
               </div>
             </div>

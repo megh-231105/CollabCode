@@ -39,10 +39,30 @@ const Dashboard = () => {
     ? currentUser.name
     : 'Developer';
 
+  // Compute rooms belonging to the current user (as owner or member)
+  const myRooms = rooms.filter((r) => {
+    if (!currentUser) return false;
+    const currentId = currentUser.id || currentUser._id;
+    const currentName = currentUser.name;
+    const isOwner =
+      (r.ownerId && currentId && r.ownerId.toString() === currentId.toString()) ||
+      (r.owner && r.owner === currentName);
+    const isMember =
+      Array.isArray(r.members) &&
+      r.members.some((m) => {
+        const memberUserId = m.user ? (m.user._id || m.user.id || m.user).toString() : null;
+        return (
+          (memberUserId && currentId && memberUserId === currentId.toString()) ||
+          (m.name && m.name === currentName)
+        );
+      });
+    return isOwner || isMember;
+  });
+
   const stats = [
     {
       title: 'My Rooms',
-      value: rooms.length,
+      value: myRooms.length,
       change: 'Active collaborative sessions',
       icon: DoorOpen,
       color: 'from-emerald-500/20 to-lime-500/10 text-emerald-400 border-emerald-500/30',
@@ -161,24 +181,24 @@ const Dashboard = () => {
             <div>
               <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
                 <DoorOpen className="w-5 h-5 text-emerald-400" />
-                <span>Recent Crew Rooms</span>
+                <span>My Active Crew Rooms</span>
               </h2>
               <p className="text-xs text-slate-400">
-                Jump back into your active coding rooms stored on MongoDB Atlas
+                Jump back into your collaborative coding rooms stored on MongoDB Atlas
               </p>
             </div>
             <Link
               to="/rooms"
               className="text-xs font-bold text-emerald-400 hover:text-lime-300 flex items-center gap-1 transition"
             >
-              <span>View All Rooms</span>
+              <span>Explore All Rooms ({rooms.length})</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          {rooms.length > 0 ? (
+          {myRooms.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {rooms.slice(0, 3).map((room) => (
+              {myRooms.slice(0, 3).map((room) => (
                 <div
                   key={room.id || room._id}
                   className="bg-charcoal-900/80 border border-charcoal-800 rounded-2xl p-6 flex flex-col justify-between hover:border-charcoal-700 transition hover:shadow-2xl group backdrop-blur-xl"
@@ -227,15 +247,26 @@ const Dashboard = () => {
           ) : (
             <div className="p-10 text-center bg-charcoal-900/40 border border-charcoal-800 rounded-3xl space-y-3">
               <DoorOpen className="w-8 h-8 text-slate-500 mx-auto" />
-              <h3 className="text-base font-bold text-white">No coding rooms found</h3>
-              <p className="text-xs text-slate-400">Launch a new room to start collaborating with your crew!</p>
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-400 to-lime-300 text-charcoal-950 font-black rounded-xl text-xs transition cursor-pointer shadow-lg shadow-emerald-500/15"
-              >
-                <Plus className="w-4 h-4 stroke-[2.5]" />
-                <span>Create Your First Room</span>
-              </button>
+              <h3 className="text-base font-bold text-white">No active rooms in your crew yet</h3>
+              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                Launch your first collaborative room or explore public rooms to code together with your peers!
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-400 to-lime-300 text-charcoal-950 font-black rounded-xl text-xs transition cursor-pointer shadow-lg shadow-emerald-500/15"
+                >
+                  <Plus className="w-4 h-4 stroke-[2.5]" />
+                  <span>Create Your First Room</span>
+                </button>
+                <Link
+                  to="/rooms"
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-charcoal-800 hover:bg-charcoal-750 border border-charcoal-700 text-slate-200 font-bold rounded-xl text-xs transition"
+                >
+                  <LogIn className="w-4 h-4 text-emerald-400" />
+                  <span>Explore Rooms ({rooms.length})</span>
+                </Link>
+              </div>
             </div>
           )}
         </div>

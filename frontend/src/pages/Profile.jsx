@@ -28,6 +28,26 @@ const Profile = () => {
   const [email, setEmail] = useState(currentUser?.email || '');
   const navigate = useNavigate();
 
+  // Compute rooms belonging to current user
+  const myRooms = rooms.filter((r) => {
+    if (!currentUser) return false;
+    const currentId = currentUser.id || currentUser._id;
+    const currentName = currentUser.name;
+    const isOwner =
+      (r.ownerId && currentId && r.ownerId.toString() === currentId.toString()) ||
+      (r.owner && r.owner === currentName);
+    const isMember =
+      Array.isArray(r.members) &&
+      r.members.some((m) => {
+        const memberUserId = m.user ? (m.user._id || m.user.id || m.user).toString() : null;
+        return (
+          (memberUserId && currentId && memberUserId === currentId.toString()) ||
+          (m.name && m.name === currentName)
+        );
+      });
+    return isOwner || isMember;
+  });
+
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     await updateProfile({ name, email });
@@ -147,7 +167,7 @@ const Profile = () => {
 
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="p-4 bg-slate-950/90 rounded-xl border border-slate-800 text-center">
-                  <span className="text-3xl font-black text-white">{rooms.length}</span>
+                  <span className="text-3xl font-black text-white">{myRooms.length}</span>
                   <span className="text-[11px] text-slate-400 block font-semibold mt-1">
                     Crew Rooms
                   </span>

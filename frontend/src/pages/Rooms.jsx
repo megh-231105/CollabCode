@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import { useApp } from '../context/AppContext';
+import { roomService } from '../services/api';
 import {
   DoorOpen,
   Plus,
@@ -15,18 +16,29 @@ import {
   Copy,
   Check,
   Share2,
-  Sparkles
+  Sparkles,
+  Compass,
+  UserCheck
 } from 'lucide-react';
 
 const Rooms = () => {
   const {
+    currentUser,
     rooms,
     deleteRoom,
     setIsCreateModalOpen,
     setIsJoinModalOpen,
     showToast,
+    refreshData,
   } = useApp();
+  const navigate = useNavigate();
   const [copiedId, setCopiedId] = useState(null);
+  const [joiningId, setJoiningId] = useState(null);
+  const [currentTab, setCurrentTab] = useState('MY_ROOMS'); // 'MY_ROOMS' | 'ALL_ROOMS'
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState('ALL');
+
+  const languages = ['ALL', 'Python', 'C++', 'Java', 'C', 'JavaScript'];
 
   const handleCopyId = (id) => {
     navigator.clipboard.writeText(id);
@@ -35,12 +47,45 @@ const Rooms = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState('ALL');
+  // Direct Join Room Action with real user authentication
+  const handleDirectJoin = async (room) => {
+    setJoiningId(room.id);
+    try {
+      await roomService.joinRoom(room.id).catch(() => null);
+      await refreshData();
+      showToast(`Entering workspace for "${room.name}" as ${currentUser?.name || 'Developer'}!`);
+      navigate(`/rooms/${room.id}`);
+    } catch (err) {
+      showToast(err.message || 'Error joining room', 'error');
+      navigate(`/rooms/${room.id}`);
+    } finally {
+      setJoiningId(null);
+    }
+  };
 
-  const languages = ['ALL', 'Python', 'C++', 'Java', 'C', 'JavaScript'];
+  // Compute rooms belonging to current user
+  const myRooms = rooms.filter((r) => {
+    if (!currentUser) return false;
+    const currentId = currentUser.id || currentUser._id;
+    const currentName = currentUser.name;
+    const isOwner =
+      (r.ownerId && currentId && r.ownerId.toString() === currentId.toString()) ||
+      (r.owner && r.owner === currentName);
+    const isMember =
+      Array.isArray(r.members) &&
+      r.members.some((m) => {
+        const memberUserId = m.user ? (m.user._id || m.user.id || m.user).toString() : null;
+        return (
+          (memberUserId && currentId && memberUserId === currentId.toString()) ||
+          (m.name && m.name === currentName)
+        );
+      });
+    return isOwner || isMember;
+  });
 
-  const filteredRooms = rooms.filter((room) => {
+  const baseRooms = currentTab === 'MY_ROOMS' ? myRooms : rooms;
+
+  const filteredRooms = baseRooms.filter((room) => {
     const nameMatch = (room.name || '').toLowerCase().includes(searchTerm.toLowerCase());
     const idMatch = (room.id || '').toLowerCase().includes(searchTerm.toLowerCase());
     const descMatch = (room.description || '').toLowerCase().includes(searchTerm.toLowerCase());
@@ -60,10 +105,10 @@ const Rooms = () => {
           <div>
             <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
               <DoorOpen className="w-7 h-7 text-emerald-400" />
-              <span>My Coding Rooms</span>
+              <span>Coding Rooms</span>
             </h1>
             <p className="mt-1 text-sm text-slate-400">
-              Manage your collaborative coding rooms and team workspaces synchronized in MongoDB Atlas.
+              Manage your personal rooms or join live collaborative sessions across CodeCrew.
             </p>
           </div>
 
@@ -80,8 +125,44 @@ const Rooms = () => {
               className="flex items-center space-x-2 px-4 py-2.5 bg-charcoal-800 hover:bg-charcoal-750 border border-charcoal-700 hover:border-emerald-500/40 text-emerald-300 font-bold rounded-xl text-xs transition cursor-pointer"
             >
               <LogIn className="w-4 h-4 stroke-[2.5]" />
-              <span>Join Room</span>
+              <span>Join with ID</span>
             </button>
+          </div>
+        </div>
+
+        {/* Tab Selection: My Rooms vs All Rooms */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center space-x-2 p-1 bg-charcoal-900 border border-charcoal-800 rounded-2xl">
+            <button
+              onClick={() => setCurrentTab('MY_ROOMS')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                currentTab === 'MY_ROOMS'
+                  ? 'bg-gradient-to-r from-emerald-400 to-lime-300 text-charcoal-950 font-black shadow-md shadow-emerald-500/20'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <DoorOpen className="w-3.5 h-3.5" />
+              <span>My Rooms ({myRooms.length})</span>
+            </button>
+            <button
+              onClick={() => setCurrentTab('ALL_ROOMS')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                currentTab === 'ALL_ROOMS'
+                  ? 'bg-gradient-to-r from-emerald-400 to-lime-300 text-charcoal-950 font-black shadow-md shadow-emerald-500/20'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Compass className="w-3.5 h-3.5" />
+              <span>Explore All Rooms ({rooms.length})</span>
+            </button>
+          </div>
+
+          <div className="text-xs text-slate-400 font-mono">
+            {currentTab === 'MY_ROOMS' ? (
+              <span>Showing rooms you created or joined</span>
+            ) : (
+              <span>Showing all active collaborative workspaces</span>
+            )}
           </div>
         </div>
 
@@ -122,75 +203,120 @@ const Rooms = () => {
           </div>
         </div>
 
-        {/* Rooms Grid (Shards Style) */}
+        {/* Rooms Grid */}
         {filteredRooms.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredRooms.map((room) => (
-              <div
-                key={room.id || room._id}
-                className="bg-charcoal-900/80 border border-charcoal-800 rounded-2xl p-6 flex flex-col justify-between hover:border-charcoal-700 transition hover:shadow-2xl group backdrop-blur-xl"
-              >
-                <div>
-                  {/* Top Bar */}
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="px-2.5 py-1 rounded-md text-[11px] font-bold font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                      {room.language || 'Python'}
-                    </span>
-                    <button
-                      onClick={() => handleCopyId(room.id)}
-                      title="Copy Room ID to invite peers"
-                      className="text-xs font-mono font-bold bg-charcoal-950 hover:bg-charcoal-800 px-2.5 py-1 rounded-lg border border-charcoal-800 hover:border-lime-500/40 text-lime-300 flex items-center space-x-1.5 transition cursor-pointer"
-                    >
-                      <span>ID: {room.id}</span>
-                      {copiedId === room.id ? (
-                        <Check className="w-3 h-3 text-emerald-400" />
+            {filteredRooms.map((room) => {
+              const currentId = currentUser?.id || currentUser?._id;
+              const currentName = currentUser?.name;
+              const isOwner =
+                (room.ownerId && currentId && room.ownerId.toString() === currentId.toString()) ||
+                (room.owner && room.owner === currentName);
+              const isMember =
+                Array.isArray(room.members) &&
+                room.members.some((m) => {
+                  const memberUserId = m.user ? (m.user._id || m.user.id || m.user).toString() : null;
+                  return (
+                    (memberUserId && currentId && memberUserId === currentId.toString()) ||
+                    (m.name && m.name === currentName)
+                  );
+                });
+              const isMemberOrOwner = isOwner || isMember;
+              const isAdmin = currentUser?.role === 'ADMIN';
+
+              return (
+                <div
+                  key={room.id || room._id}
+                  className="bg-charcoal-900/80 border border-charcoal-800 rounded-2xl p-6 flex flex-col justify-between hover:border-charcoal-700 transition hover:shadow-2xl group backdrop-blur-xl"
+                >
+                  <div>
+                    {/* Top Bar */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-1.5">
+                        <span className="px-2.5 py-1 rounded-md text-[11px] font-bold font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                          {room.language || 'Python'}
+                        </span>
+                        {isOwner && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-lime-500/15 text-lime-300 border border-lime-500/25">
+                            Host
+                          </span>
+                        )}
+                        {!isOwner && isMember && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">
+                            Joined
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleCopyId(room.id)}
+                        title="Copy Room ID to invite peers"
+                        className="text-xs font-mono font-bold bg-charcoal-950 hover:bg-charcoal-800 px-2.5 py-1 rounded-lg border border-charcoal-800 hover:border-lime-500/40 text-lime-300 flex items-center space-x-1.5 transition cursor-pointer"
+                      >
+                        <span>ID: {room.id}</span>
+                        {copiedId === room.id ? (
+                          <Check className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3 h-3 text-slate-500 hover:text-white" />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Room Name & Description */}
+                    <h3 className="text-lg font-bold text-white group-hover:text-emerald-300 transition mb-1.5 tracking-tight truncate">
+                      {room.name}
+                    </h3>
+                    <p className="text-xs text-slate-400 line-clamp-2 mb-4 leading-relaxed">
+                      {room.description || 'Collaborative coding workspace session on CodeCrew.'}
+                    </p>
+                  </div>
+
+                  {/* Metadata & Actions */}
+                  <div className="pt-4 border-t border-charcoal-800 space-y-3">
+                    <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
+                      <div className="flex items-center space-x-1.5">
+                        <Users className="w-3.5 h-3.5 text-lime-400" />
+                        <span>{room.members ? room.members.length : 1} Crew Members</span>
+                      </div>
+                      <div className="flex items-center space-x-1.5">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{room.lastUpdated || 'Recently'}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {isMemberOrOwner ? (
+                        <Link
+                          to={`/rooms/${room.id}`}
+                          className="flex-1 flex items-center justify-center space-x-2 py-2.5 bg-charcoal-800 hover:bg-emerald-400 hover:text-charcoal-950 text-slate-200 border border-charcoal-700 hover:border-emerald-400 font-bold rounded-xl text-xs transition duration-150"
+                        >
+                          <span>Open Workspace</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </Link>
                       ) : (
-                        <Copy className="w-3 h-3 text-slate-500 hover:text-white" />
+                        <button
+                          onClick={() => handleDirectJoin(room)}
+                          disabled={joiningId === room.id}
+                          className="uiverse-btn-glow flex-1 flex items-center justify-center space-x-2 py-2.5 bg-gradient-to-r from-emerald-400 to-lime-300 hover:from-emerald-300 hover:to-lime-200 text-charcoal-950 font-black rounded-xl text-xs transition duration-150 shadow-md shadow-emerald-500/15 cursor-pointer disabled:opacity-50"
+                        >
+                          <LogIn className="w-3.5 h-3.5 stroke-[2.5]" />
+                          <span>{joiningId === room.id ? 'Joining Room...' : 'Join Room Directly'}</span>
+                        </button>
                       )}
-                    </button>
-                  </div>
 
-                  {/* Room Name & Description */}
-                  <h3 className="text-lg font-bold text-white group-hover:text-emerald-300 transition mb-1.5 tracking-tight truncate">
-                    {room.name}
-                  </h3>
-                  <p className="text-xs text-slate-400 line-clamp-2 mb-4 leading-relaxed">
-                    {room.description || 'Collaborative coding workspace session on CodeCrew.'}
-                  </p>
-                </div>
-
-                {/* Metadata & Actions */}
-                <div className="pt-4 border-t border-charcoal-800 space-y-3">
-                  <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
-                    <div className="flex items-center space-x-1.5">
-                      <Users className="w-3.5 h-3.5 text-lime-400" />
-                      <span>{room.members ? room.members.length : 1} Crew Members</span>
-                    </div>
-                    <div className="flex items-center space-x-1.5">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{room.lastUpdated || 'Recently'}</span>
+                      {(isOwner || isAdmin) && (
+                        <button
+                          onClick={() => deleteRoom(room.id)}
+                          title="Delete Room"
+                          className="p-2.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-charcoal-800 hover:border-rose-500/30 rounded-xl transition cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <Link
-                      to={`/rooms/${room.id}`}
-                      className="flex-1 flex items-center justify-center space-x-2 py-2.5 bg-charcoal-800 hover:bg-emerald-400 hover:text-charcoal-950 text-slate-200 border border-charcoal-700 hover:border-emerald-400 font-bold rounded-xl text-xs transition duration-150"
-                    >
-                      <span>Open Workspace</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </Link>
-                    <button
-                      onClick={() => deleteRoom(room.id)}
-                      title="Delete Room"
-                      className="p-2.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-charcoal-800 hover:border-rose-500/30 rounded-xl transition cursor-pointer"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           /* Empty State */
@@ -198,17 +324,34 @@ const Rooms = () => {
             <div className="w-12 h-12 mx-auto rounded-2xl bg-charcoal-800 flex items-center justify-center text-slate-400">
               <DoorOpen className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-white">No coding rooms found</h3>
+            <h3 className="text-lg font-bold text-white">
+              {currentTab === 'MY_ROOMS'
+                ? 'You have 0 active rooms in your crew'
+                : 'No coding rooms found matching query'}
+            </h3>
             <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              No rooms matched your search criteria. Launch a new room to start collaborating with your crew!
+              {currentTab === 'MY_ROOMS'
+                ? 'You have not created or joined any coding rooms yet. Launch your first room or explore existing crew rooms to join!'
+                : 'No rooms matched your search criteria. Try a different filter or create a new room.'}
             </p>
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-emerald-400 to-lime-300 text-charcoal-950 font-black rounded-xl text-xs transition cursor-pointer shadow-lg shadow-emerald-500/20"
-            >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
-              <span>Create New Room</span>
-            </button>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="inline-flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-emerald-400 to-lime-300 text-charcoal-950 font-black rounded-xl text-xs transition cursor-pointer shadow-lg shadow-emerald-500/20"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>Create New Room</span>
+              </button>
+              {currentTab === 'MY_ROOMS' && rooms.length > 0 && (
+                <button
+                  onClick={() => setCurrentTab('ALL_ROOMS')}
+                  className="inline-flex items-center space-x-2 px-4 py-2.5 bg-charcoal-800 hover:bg-charcoal-750 border border-charcoal-700 text-slate-200 font-bold rounded-xl text-xs transition cursor-pointer"
+                >
+                  <Compass className="w-4 h-4 text-emerald-400" />
+                  <span>Explore Community Rooms ({rooms.length})</span>
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>

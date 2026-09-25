@@ -199,18 +199,19 @@ const getRoomById = async (req, res) => {
 
     // If authenticated user is not in room members, automatically add them as a Member
     if (req.user) {
+      const realUserName = req.user.name || 'Developer';
       const isMember = room.members.some(
         (m) =>
           (m.user && m.user.toString() === req.user._id.toString()) ||
-          m.name === req.user.name
+          m.name === realUserName
       );
       if (!isMember) {
         room.members.push({
           user: req.user._id,
-          name: req.user.name,
+          name: realUserName,
           role: room.owner && room.owner._id.toString() === req.user._id.toString() ? 'Host' : 'Member',
           isOnline: true,
-          color: 'bg-cyan-500',
+          color: 'bg-emerald-500',
         });
         await room.save();
       }
@@ -263,19 +264,20 @@ const joinRoom = async (req, res) => {
       });
     }
 
+    const realUserName = req.user.name || 'Developer';
     const isMember = room.members.some(
       (m) =>
         (m.user && m.user.toString() === req.user._id.toString()) ||
-        m.name === req.user.name
+        m.name === realUserName
     );
 
     if (!isMember) {
       room.members.push({
         user: req.user._id,
-        name: req.user.name,
+        name: realUserName,
         role: room.owner.toString() === req.user._id.toString() ? 'Host' : 'Member',
         isOnline: true,
-        color: 'bg-cyan-500',
+        color: 'bg-emerald-500',
       });
       await room.save();
     }

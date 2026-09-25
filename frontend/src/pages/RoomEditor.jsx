@@ -58,10 +58,12 @@ const RoomEditor = () => {
   const [isSaving, setIsSaving] = useState(false);
   const textareaRef = useRef(null);
 
-  // Fetch live room from backend MongoDB Atlas
+  // Fetch live room from backend MongoDB Atlas and ensure member is joined
   useEffect(() => {
     const fetchRoom = async () => {
       try {
+        // Explicitly register joining the room
+        await roomService.joinRoom(roomId).catch(() => null);
         const res = await roomService.getRoomById(roomId);
         if (res && res.room) {
           setCurrentRoom(res.room);
